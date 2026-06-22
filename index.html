@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dipayan's Laboratory | Projects Hub</title>
-    <meta name="description" content="Welcome to Dipayan's Laboratory, a collection of experiments and tools from the intersection of AI and engineering.">
+    <title>Dipayan's Laboratory | Projects & Courses</title>
+    <meta name="description" content="Welcome to Dipayan's Laboratory, a collection of experiments, courses, and tools from the intersection of AI and engineering.">
     
-    <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -42,7 +41,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 4rem 1.5rem;
             flex: 1;
@@ -74,7 +73,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
             animation: fadeInUp 1s ease-out;
         }
@@ -120,14 +119,13 @@
         .card-icon {
             width: 48px;
             height: 48px;
-            background: rgba(99, 102, 241, 0.2);
+            background: rgba(99, 102, 241, 0.15);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1.5rem;
-            color: var(--accent-color);
-            font-size: 1.5rem;
+            color: var(--accent-hover);
         }
 
         .card h2 {
@@ -146,7 +144,7 @@
         .card-footer {
             display: flex;
             align-items: center;
-            color: var(--accent-color);
+            color: var(--accent-hover);
             font-weight: 600;
             gap: 0.5rem;
         }
@@ -180,6 +178,7 @@
         @media (max-width: 640px) {
             h1 { font-size: 2.5rem; }
             .container { padding-top: 2rem; }
+            .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -187,35 +186,69 @@
     <div class="container" id="main-content">
         <header>
             <h1>Dipayan's Laboratory</h1>
-            <p class="tagline">An eclectic collection of experiments, AI tools, and engineering projects by Dipayan.</p>
+            <p class="tagline">An eclectic collection of experiments, AI tools, and educational courses by Dipayan.</p>
         </header>
 
         <main class="grid">
-    <a href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer" class="card" id="card-prompt-optimiser">
-        <h2>Prompt Token Optimizer</h2>
-        <p>A sophisticated tool designed to analyze and optimize LLM prompts for maximum efficiency without losing semantic integrity.</p>
-        <div class="card-footer">
-            Launch Tool
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-        </div>
-    </a>
-
-            <!-- Placeholder for future projects -->
-            <div class="card" style="opacity: 0.6; cursor: default;">
-                <a href="/data_dash/" target="_blank" rel="noopener noreferrer" class="card" id="card-prompt-optimiser">
-                <h2>Data Validation Dashboard</h2>
-                <p>BigQuery Warehouse vs. Ad Platform API reconciliation.</p>
+            
+            <a href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <h2>Prompt Token Optimizer</h2>
+                <p>A sophisticated tool designed to analyze and optimize LLM prompts for maximum efficiency without losing semantic integrity.</p>
                 <div class="card-footer">
                     Launch Tool
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
                 </div>
-            </div>
+            </a>
+
+            <a href="/ai-course-for-legal-professionals" class="card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6a1 1 0 0 1-1-1z"></path>
+                        <path d="M9 7h6"></path>
+                        <path d="M9 13h6"></path>
+                    </svg>
+                </div>
+                <h2>AI for Legal Professionals</h2>
+                <p>Master the intersection of artificial intelligence and law. Learn to leverage AI tools for legal research, drafting, and analysis.</p>
+                <div class="card-footer">
+                    View Course
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/ai-masterclass/" class="card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l10 6.5-10 6.5-10-6.5z"></path>
+                        <path d="M22 8.5V15l-10 6.5L2 15V8.5"></path>
+                        <path d="M12 22v-6.5"></path>
+                        <path d="M12 15L2 8.5"></path>
+                        <path d="M12 15l10-6.5"></path>
+                    </svg>
+                </div>
+                <h2>AI Masterclass</h2>
+                <p>A comprehensive deep dive into advanced artificial intelligence concepts, modern workflows, and practical applications.</p>
+                <div class="card-footer">
+                    View Course
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+            </a>
+
         </main>
     </div>
 
