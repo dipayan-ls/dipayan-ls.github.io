@@ -2,9 +2,15 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Instruments & Courses</title>
     <meta name="description" content="A working collection of AI instruments and courses from Dipayan Dhar — tools built, tested, and kept running at the seam between engineering and intelligence.">
+    <meta name="theme-color" content="#e9edf0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d0f13" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
 
     <!-- Set theme before paint to avoid a flash of the wrong mode -->
     <script>
@@ -58,8 +64,13 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { -webkit-tap-highlight-color: transparent; }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
 
         body {
             font-family: 'Spline Sans', system-ui, -apple-system, sans-serif;
@@ -71,10 +82,18 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+            overscroll-behavior-y: contain;
             transition: background-color 0.35s ease, color 0.35s ease;
         }
 
-        .wrap { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 2rem; }
+        a, button { touch-action: manipulation; }
+
+        .wrap {
+            width: 100%; max-width: 1040px; margin: 0 auto;
+            padding-left: max(2rem, env(safe-area-inset-left));
+            padding-right: max(2rem, env(safe-area-inset-right));
+        }
 
         .sr-only {
             position: absolute; width: 1px; height: 1px;
@@ -95,25 +114,30 @@
            ============================================================ */
         .topbar {
             display: flex; align-items: center; justify-content: space-between;
-            padding-top: 2rem; padding-bottom: 2rem;
+            gap: 1rem;
+            padding-top: max(2rem, env(safe-area-inset-top));
+            padding-bottom: 2rem;
         }
 
         .mark {
             display: inline-flex; align-items: center; gap: 0.6rem;
             color: var(--ink); font-weight: 600;
+            min-width: 0;
         }
         .mark-dot {
             width: 8px; height: 8px; border-radius: 50%;
+            flex: none;
             background: var(--accent);
             box-shadow: 0 0 0 0 var(--glow);
         }
-        .mark-text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; letter-spacing: 0.18em; }
+        .mark-text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; letter-spacing: 0.18em; white-space: nowrap; }
 
         /* Instrument-style theme switch: Paper / Panel */
         .switch {
             position: relative;
             display: inline-flex;
             align-items: stretch;
+            flex: none;
             border: 1px solid var(--line);
             background: var(--panel);
             border-radius: 999px;
@@ -122,8 +146,8 @@
             font-family: 'JetBrains Mono', ui-monospace, monospace;
             transition: border-color 0.25s ease, background-color 0.35s ease;
         }
-        .switch:hover { border-color: var(--accent); }
         .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .switch:active { border-color: var(--accent); }
         .switch-knob {
             position: absolute;
             top: 4px; left: 4px;
@@ -136,9 +160,9 @@
         :root[data-theme="dark"] .switch-knob { transform: translateX(100%); }
         .switch-opt {
             position: relative; z-index: 1;
-            min-width: 4.4rem;
+            min-width: 4.1rem;
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 0.32rem 0.2rem;
+            padding: 0.5rem 0.3rem;
             font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
             color: var(--muted);
             transition: color 0.3s ease;
@@ -156,7 +180,7 @@
         .hero h1 {
             font-family: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
             font-weight: 400;
-            font-size: clamp(3.4rem, 9vw, 6.4rem);
+            font-size: clamp(3rem, 9vw, 6.4rem);
             line-height: 0.96;
             letter-spacing: -0.01em;
             margin: 1.1rem 0 1.4rem;
@@ -211,80 +235,102 @@
             filter: drop-shadow(0 0 5px var(--glow));
         }
 
+        /* node markers on the trace — one per instrument/course below */
+        .node { stroke-width: 2; vector-effect: non-scaling-stroke; }
+        .node-live { fill: var(--accent); stroke: var(--accent); filter: drop-shadow(0 0 5px var(--glow)); }
+        .node-open { fill: var(--panel); stroke: var(--faint); }
+
+        .scope svg text { font-family: 'JetBrains Mono', ui-monospace, monospace; text-anchor: middle; }
+        .node-label { font-size: 10.5px; letter-spacing: 0.05em; fill: var(--faint); }
+
         /* ============================================================
-           LEDGER (the index of entries)
+           PRODUCTS (the instrument + the courses)
            ============================================================ */
-        .ledger { margin-top: 4.5rem; }
+        .products { margin-top: 4.5rem; }
 
-        .ledger-grid {
-            display: grid;
-            grid-template-columns: 4.5rem minmax(0, 1fr) 6.5rem 6.5rem 2.4rem;
-            column-gap: 1.4rem;
-            align-items: center;
-        }
-
-        .ledger-head {
+        .products-head {
+            display: flex; align-items: baseline; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
             color: var(--faint);
-            padding: 0 1.1rem 0.85rem 1.4rem;
+            padding-bottom: 0.9rem;
+            margin-bottom: 2.1rem;
             border-bottom: 1.5px solid var(--ink);
         }
-        .ledger-head .col-status { justify-self: start; }
 
-        .entries { border-bottom: 1px solid var(--line); }
+        .product-group + .product-group { margin-top: 2.4rem; }
 
-        .entry {
+        .group-label {
+            display: block;
+            color: var(--faint);
+            margin-bottom: 0.9rem;
+        }
+
+        /* shared card chrome */
+        .card {
             position: relative;
+            display: block;
             text-decoration: none;
             color: inherit;
-            padding: 1.25rem 1.1rem 1.25rem 1.4rem;
-            border-top: 1px solid var(--line);
-            transition: background-color 0.22s ease;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .entry::before {
-            content: "";
-            position: absolute; left: 0; top: 10px; bottom: 10px;
-            width: 3px; border-radius: 2px;
-            background: var(--accent);
-            transform: scaleY(0); transform-origin: top;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .entry:hover, .entry:focus-visible { background: var(--panel); outline: none; }
-        .entry:hover::before, .entry:focus-visible::before { transform: scaleY(1); }
 
-        .entry-id {
-            grid-area: id;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 0.78rem; letter-spacing: 0.06em;
+        /* always-on affordance for keyboard focus (works regardless of pointer type) */
+        .card:focus-visible {
+            outline: none;
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px -20px rgba(0,0,0,0.35);
+        }
+        :root[data-theme="dark"] .card:focus-visible {
+            box-shadow: 0 0 0 1px var(--accent), 0 18px 32px -16px rgba(0,0,0,0.6);
+        }
+        .card:focus-visible .card-icon  { border-color: var(--accent); background: var(--paper); }
+        .card:focus-visible .card-arrow { color: var(--accent); transform: translateX(5px); }
+        .card:focus-visible .card-tag   { border-color: var(--accent); color: var(--accent); }
+        .card:focus-visible .card-cta   { color: var(--accent); }
+        .card:focus-visible .card-cta svg { transform: translateX(4px); }
+
+        /* immediate, gentle feedback on tap — Android & iOS */
+        .card:active {
+            border-color: var(--accent);
+            transform: translateY(-1px) scale(0.992);
+        }
+        :root[data-theme="dark"] .card:active { box-shadow: 0 0 0 1px var(--accent); }
+        .card:active .card-icon  { border-color: var(--accent); }
+        .card:active .card-arrow { color: var(--accent); transform: translateX(3px); }
+        .card:active .card-tag   { border-color: var(--accent); color: var(--accent); }
+        .card:active .card-cta   { color: var(--accent); }
+
+        .card-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            flex: none;
+            width: 2.6rem; height: 2.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--chip-border);
+            color: var(--accent-soft);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .card-arrow {
             color: var(--faint);
-            transition: color 0.22s ease;
+            display: inline-flex;
+            transition: color 0.2s ease, transform 0.2s ease;
         }
-        .entry-name {
-            grid-area: name;
-            font-family: 'Instrument Serif', Georgia, serif;
-            font-size: clamp(1.45rem, 2.6vw, 1.75rem);
-            line-height: 1.1;
-        }
-        .entry-spec {
-            grid-area: spec;
-            color: var(--muted);
-            font-size: 0.92rem; font-weight: 300;
-            max-width: 52ch;
-            margin-top: 0.2rem;
-        }
-        .entry-class {
-            grid-area: class;
-            justify-self: start;
+
+        .card-tag {
             font-family: 'JetBrains Mono', ui-monospace, monospace;
             font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
             color: var(--muted);
             border: 1px solid var(--chip-border);
             border-radius: 4px;
             padding: 0.28rem 0.5rem;
-            transition: border-color 0.22s ease, color 0.22s ease;
+            transition: border-color 0.2s ease, color 0.2s ease;
         }
-        .entry-status {
-            grid-area: status;
-            justify-self: start;
+
+        .card-status {
             display: inline-flex; align-items: center; gap: 0.45rem;
             font-family: 'JetBrains Mono', ui-monospace, monospace;
             font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
@@ -294,30 +340,99 @@
         .status-live { background: var(--accent); box-shadow: 0 0 6px var(--glow); }
         .status-open { background: transparent; border: 1.5px solid var(--faint); }
 
-        .entry-arrow {
-            grid-area: arrow;
-            justify-self: end;
+        .card-cta {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
             color: var(--faint);
-            display: inline-flex;
-            transition: color 0.22s ease, transform 0.22s ease;
+            margin-left: auto;
+            transition: color 0.2s ease;
         }
-        .entry:hover .entry-arrow, .entry:focus-visible .entry-arrow { color: var(--accent); transform: translateX(5px); }
-        .entry:hover .entry-id, .entry:focus-visible .entry-id { color: var(--accent); }
-        .entry:hover .entry-class, .entry:focus-visible .entry-class { border-color: var(--accent); color: var(--accent); }
+        .card-cta svg { transition: transform 0.2s ease; }
 
-        .entry-name {
-            grid-area: name;
+        /* hover refinements — only for devices with a real pointer, so taps
+           on phones never get stuck showing a "hover" state */
+        @media (hover: hover) and (pointer: fine) {
+            .switch:hover { border-color: var(--accent); }
+
+            .card:hover {
+                border-color: var(--accent);
+                transform: translateY(-3px);
+                box-shadow: 0 16px 30px -20px rgba(0,0,0,0.35);
+            }
+            :root[data-theme="dark"] .card:hover {
+                box-shadow: 0 0 0 1px var(--accent), 0 18px 32px -16px rgba(0,0,0,0.6);
+            }
+            .card:hover .card-icon  { border-color: var(--accent); background: var(--paper); }
+            .card:hover .card-arrow { color: var(--accent); transform: translateX(5px); }
+            .card:hover .card-tag   { border-color: var(--accent); color: var(--accent); }
+            .card:hover .card-cta   { color: var(--accent); }
+            .card:hover .card-cta svg { transform: translateX(4px); }
         }
 
-        /* place the parts on the desktop grid */
-        .entry {
+        /* ---- featured card (the instrument) ---- */
+        .card-featured {
+            padding: 1.85rem 1.9rem;
             display: grid;
-            grid-template-columns: 4.5rem minmax(0, 1fr) 6.5rem 6.5rem 2.4rem;
+            grid-template-columns: auto 1fr auto;
             grid-template-areas:
-                "id name  class status arrow"
-                "id spec  class status arrow";
+                "icon name arrow"
+                "icon desc desc"
+                "icon foot foot";
             column-gap: 1.4rem;
-            align-items: center;
+            row-gap: 0.6rem;
+            align-items: start;
+        }
+        .card-featured .card-icon  { grid-area: icon; }
+        .card-featured .card-arrow { grid-area: arrow; justify-self: end; }
+        .card-featured .card-name {
+            grid-area: name;
+            align-self: center;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: clamp(1.5rem, 2.8vw, 1.95rem);
+            line-height: 1.15;
+        }
+        .card-featured .card-desc {
+            grid-area: desc;
+            color: var(--muted);
+            font-size: 0.95rem; font-weight: 300;
+            max-width: 58ch;
+        }
+        .card-featured .card-foot {
+            grid-area: foot;
+            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+            margin-top: 0.35rem;
+        }
+
+        /* ---- course cards ---- */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.1rem;
+        }
+        .card-course {
+            padding: 1.6rem 1.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .card-course .card-top {
+            display: flex; align-items: center; gap: 0.9rem;
+        }
+        .card-course .card-name {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: clamp(1.35rem, 2.4vw, 1.55rem);
+            line-height: 1.18;
+        }
+        .card-course .card-desc {
+            color: var(--muted);
+            font-size: 0.92rem; font-weight: 300;
+            flex-grow: 1;
+        }
+        .card-course .card-foot {
+            display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--line);
         }
 
         /* ============================================================
@@ -326,7 +441,8 @@
         footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
-            padding-top: 2rem; padding-bottom: 2.5rem;
+            padding-top: 2rem;
+            padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
         }
         .footer-row {
             display: flex; align-items: center; justify-content: space-between;
@@ -346,7 +462,7 @@
             }
             @keyframes draw { to { stroke-dashoffset: 0; } }
 
-            .blip, .mark-dot { animation: pulse 2.4s ease-in-out infinite; }
+            .blip, .mark-dot, .node-live { animation: pulse 2.4s ease-in-out infinite; }
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
             .reveal { opacity: 0; transform: translateY(10px); animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -364,24 +480,22 @@
            RESPONSIVE
            ============================================================ */
         @media (max-width: 720px) {
-            .wrap { padding: 0 1.25rem; }
-            .hero { padding-top: 2.5rem; }
-            .ledger-head { display: none; }
-
-            .entry {
-                grid-template-columns: 1fr auto;
-                grid-template-areas:
-                    "id     arrow"
-                    "name   name"
-                    "spec   spec"
-                    "class  status";
-                row-gap: 0.5rem;
-                align-items: center;
-                padding: 1.4rem 0.5rem 1.4rem 1rem;
+            .wrap {
+                padding-left: max(1.25rem, env(safe-area-inset-left));
+                padding-right: max(1.25rem, env(safe-area-inset-right));
             }
-            .entry-status { justify-self: end; }
-            .entry-spec { max-width: none; }
-            .switch-opt { min-width: 3.6rem; }
+            .hero { padding-top: 2.5rem; }
+
+            .course-grid { grid-template-columns: 1fr; }
+
+            .card-featured { padding: 1.5rem 1.25rem; column-gap: 1rem; }
+            .card-course { padding: 1.4rem 1.45rem; }
+        }
+
+        @media (max-width: 480px) {
+            .topbar { gap: 0.6rem; }
+            .mark-text { font-size: 0.66rem; letter-spacing: 0.13em; }
+            .switch-opt { min-width: 3.1rem; font-size: 0.6rem; padding: 0.46rem 0.2rem; }
         }
     </style>
 </head>
@@ -410,67 +524,112 @@
 
             <div class="readout reveal d4">
                 <div class="readout-cap mono">
-                    <span>FIG.01 — SIGNAL READOUT</span>
+                    <span>INSTRUMENT STATUS</span>
                     <span class="live"><i class="blip" aria-hidden="true"></i> LIVE · SYSTEM ONLINE</span>
                 </div>
-                <div class="scope">
-                    <svg viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-                        <path class="scope-base" d="M0 80 H1000"/>
+                <div class="scope" aria-hidden="true">
+                    <svg viewBox="0 0 1000 160" preserveAspectRatio="none" focusable="false">
+                        <path class="scope-base" d="M0 70 H1000"/>
                         <path class="trace" pathLength="1"
-                            d="M0 80 L70 80 Q92 80 104 60 T148 80 Q172 80 184 96 T228 80 L300 80 L334 80
-                               C352 80 356 20 380 20 L393 132 L405 44 L417 80 L470 80
-                               Q498 80 512 64 T556 80 Q584 80 598 92 T642 80
-                               Q686 80 706 72 T752 80 Q792 80 812 86 T858 80 L1000 80"/>
+                            d="M0 70 H140 V30 H240 V70 H470 V30 H570 V70 H780 V30 H880 V70 H1000"/>
+
+                        <circle class="node node-live" cx="190" cy="30" r="6"/>
+                        <circle class="node node-open" cx="520" cy="30" r="6"/>
+                        <circle class="node node-open" cx="830" cy="30" r="6"/>
+
+                        <text class="node-label" x="190" y="112">OPTIMIZER</text>
+                        <text class="node-label" x="520" y="112">LEGAL AI</text>
+                        <text class="node-label" x="830" y="112">MASTERCLASS</text>
                     </svg>
                 </div>
             </div>
         </section>
 
-        <section class="ledger" aria-label="Projects and courses">
-            <div class="ledger-grid ledger-head mono">
-                <span class="col-id">№</span>
-                <span class="col-name">Entry</span>
-                <span class="col-class">Class</span>
-                <span class="col-status">Status</span>
-                <span></span>
+        <section class="products" aria-label="Projects and courses">
+            <div class="products-head mono">
+                <span>BUILD INDEX</span>
+                <span>03 ENTRIES · 2026</span>
             </div>
 
-            <div class="entries">
-                <a class="entry reveal e1" href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer"
-                   aria-label="Open Prompt Token Optimizer — tool, live">
-                    <span class="entry-id">T-01</span>
-                    <span class="entry-name">Prompt Token Optimizer</span>
-                    <span class="entry-spec">Analyze and compress LLM prompts for maximum efficiency, without losing semantic integrity.</span>
-                    <span class="entry-class">Tool</span>
-                    <span class="entry-status"><span class="status-dot status-live" aria-hidden="true"></span> Live</span>
-                    <span class="entry-arrow" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </span>
-                </a>
+            <div class="product-group">
+                <span class="group-label mono">Instrument</span>
 
-                <a class="entry reveal e2" href="/ai-course-for-legal-professionals"
-                   aria-label="Open AI for Legal Professionals — course, open">
-                    <span class="entry-id">C-01</span>
-                    <span class="entry-name">AI for Legal Professionals</span>
-                    <span class="entry-spec">Apply AI to legal research, drafting, and analysis — the working intersection of law and machine intelligence.</span>
-                    <span class="entry-class">Course</span>
-                    <span class="entry-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                    <span class="entry-arrow" aria-hidden="true">
+                <a class="card card-featured reveal e1" href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer"
+                   aria-label="Open Prompt Token Optimizer — tool, live, opens in a new tab">
+                    <span class="card-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <circle cx="9" cy="6" r="2"></circle>
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                            <circle cx="15" cy="12" r="2"></circle>
+                            <line x1="4" y1="18" x2="20" y2="18"></line>
+                            <circle cx="11" cy="18" r="2"></circle>
+                        </svg>
+                    </span>
+                    <span class="card-arrow" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </span>
+                    <h3 class="card-name">Prompt Token Optimizer</h3>
+                    <p class="card-desc">Analyze and compress LLM prompts for maximum efficiency, without losing semantic integrity.</p>
+                    <div class="card-foot">
+                        <span class="card-tag">Tool</span>
+                        <span class="card-status"><span class="status-dot status-live" aria-hidden="true"></span> Live</span>
+                        <span class="card-cta">Launch
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </span>
+                    </div>
                 </a>
+            </div>
 
-                <a class="entry reveal e3" href="/ai-masterclass/"
-                   aria-label="Open AI Masterclass — course, open">
-                    <span class="entry-id">C-02</span>
-                    <span class="entry-name">AI Masterclass</span>
-                    <span class="entry-spec">A deep dive into advanced AI concepts, modern workflows, and practical, hands-on applications.</span>
-                    <span class="entry-class">Course</span>
-                    <span class="entry-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                    <span class="entry-arrow" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </span>
-                </a>
+            <div class="product-group">
+                <span class="group-label mono">Courses</span>
+
+                <div class="course-grid">
+                    <a class="card card-course reveal e2" href="/ai-course-for-legal-professionals" target="_blank" rel="noopener noreferrer"
+                       aria-label="Open AI for Legal Professionals — course, open, opens in a new tab">
+                        <div class="card-top">
+                            <span class="card-icon" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 6 C10 4.5 7 4 4 4.5 V18 C7 17.5 10 18 12 19.5 C14 18 17 17.5 20 18 V4.5 C17 4 14 4.5 12 6 Z"/>
+                                    <line x1="12" y1="6" x2="12" y2="19.5"/>
+                                </svg>
+                            </span>
+                            <h3 class="card-name">AI for Legal Professionals</h3>
+                        </div>
+                        <p class="card-desc">Apply AI to legal research, drafting, and analysis — the working intersection of law and machine intelligence.</p>
+                        <div class="card-foot">
+                            <span class="card-tag">Course</span>
+                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
+                            <span class="card-cta">Enroll
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <a class="card card-course reveal e3" href="/ai-masterclass/" target="_blank" rel="noopener noreferrer"
+                       aria-label="Open AI Masterclass — course, open, opens in a new tab">
+                        <div class="card-top">
+                            <span class="card-icon" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="9" r="5.5"/>
+                                    <line x1="9" y1="13.8" x2="7.5" y2="21"/>
+                                    <line x1="15" y1="13.8" x2="16.5" y2="21"/>
+                                    <line x1="7.5" y1="21" x2="9.5" y2="19"/>
+                                    <line x1="16.5" y1="21" x2="14.5" y2="19"/>
+                                </svg>
+                            </span>
+                            <h3 class="card-name">AI Masterclass</h3>
+                        </div>
+                        <p class="card-desc">A deep dive into advanced AI concepts, modern workflows, and practical, hands-on applications.</p>
+                        <div class="card-foot">
+                            <span class="card-tag">Course</span>
+                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
+                            <span class="card-cta">Enroll
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
     </div>
