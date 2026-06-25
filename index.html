@@ -436,7 +436,19 @@
             gap: 1rem; flex-wrap: wrap;
             color: var(--faint);
         }
-        .footer-row .left { color: var(--muted); font-size: 0.9rem; }
+        .footer-row .left { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 0.5rem; 
+    color: var(--muted); 
+    font-size: 0.9rem; 
+}
+
+.footer-logo {
+    height: 1.2rem; /* Keeps it proportional to the text size */
+    width: auto;
+    border-radius: 4px; /* Slightly rounds the edges */
+}
 
         /* ============================================================
            MOTION
@@ -642,10 +654,13 @@
         </section>
     </div>
 
-    <footer>
+<footer>
         <div class="wrap">
             <div class="footer-row mono">
-                <span class="left">© 2026 Dipayan</span>
+                <span class="left">
+                    <img src="/logo.png" alt="DD Logo" class="footer-logo">
+                    © 2026 Dipayan
+                </span>
                 <span>MAINTAINED 2026</span>
             </div>
         </div>
