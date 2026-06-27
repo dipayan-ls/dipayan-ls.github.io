@@ -437,18 +437,18 @@
             color: var(--faint);
         }
         .footer-row .left { 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 0.5rem; 
-    color: var(--muted); 
-    font-size: 0.9rem; 
-}
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            color: var(--muted); 
+            font-size: 0.9rem; 
+        }
 
-.footer-logo {
-    height: 1.2rem; /* Keeps it proportional to the text size */
-    width: auto;
-    border-radius: 4px; /* Slightly rounds the edges */
-}
+        .footer-logo {
+            height: 1.2rem;
+            width: auto;
+            border-radius: 4px;
+        }
 
         /* ============================================================
            MOTION
@@ -473,6 +473,8 @@
             .e2 { animation-delay: 0.6s; }
             .e3 { animation-delay: 0.7s; }
             .e4 { animation-delay: 0.8s; }
+            .e5 { animation-delay: 0.9s; }
+            .e6 { animation-delay: 1.0s; }
             @keyframes rise { to { opacity: 1; transform: translateY(0); } }
         }
 
@@ -529,17 +531,21 @@
                     <svg viewBox="0 0 1000 160" preserveAspectRatio="none" focusable="false">
                         <path class="scope-base" d="M0 70 H1000"/>
                         <path class="trace" pathLength="1"
-                            d="M0 70 H75 V30 H175 V70 H325 V30 H425 V70 H575 V30 H675 V70 H825 V30 H925 V70 H1000"/>
+                            d="M0 70 H75 V30 H175 V70 H225 V30 H325 V70 H375 V30 H475 V70 H525 V30 H625 V70 H675 V30 H775 V70 H825 V30 H925 V70 H1000"/>
 
                         <circle class="node node-live" cx="125" cy="30" r="6"/>
-                        <circle class="node node-open" cx="375" cy="30" r="6"/>
-                        <circle class="node node-open" cx="625" cy="30" r="6"/>
+                        <circle class="node node-open" cx="275" cy="30" r="6"/>
+                        <circle class="node node-open" cx="425" cy="30" r="6"/>
+                        <circle class="node node-open" cx="575" cy="30" r="6"/>
+                        <circle class="node node-open" cx="725" cy="30" r="6"/>
                         <circle class="node node-open" cx="875" cy="30" r="6"/>
 
                         <text class="node-label" x="125" y="112">OPTIMIZER</text>
-                        <text class="node-label" x="375" y="112">LEGAL AI</text>
-                        <text class="node-label" x="625" y="112">MASTERCLASS</text>
-                        <text class="node-label" x="875" y="112">CLOUD</text>
+                        <text class="node-label" x="275" y="112">LEGAL AI</text>
+                        <text class="node-label" x="425" y="112">AI MASTER</text>
+                        <text class="node-label" x="575" y="112">CLOUD</text>
+                        <text class="node-label" x="725" y="112">PYTHON</text>
+                        <text class="node-label" x="875" y="112">SQL</text>
                     </svg>
                 </div>
             </div>
@@ -548,7 +554,7 @@
         <section class="products" aria-label="Projects and courses">
             <div class="products-head mono">
                 <span>BUILD INDEX</span>
-                <span>04 ENTRIES · 2026</span>
+                <span>06 ENTRIES · 2026</span>
             </div>
 
             <div class="product-group">
@@ -570,7 +576,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </span>
                     <h3 class="card-name">Prompt Token Optimizer</h3>
-                    <p class="card-desc">Analyze and compress LLM prompts for maximum efficiency, without losing semantic integrity.</p>
+                    <p class="card-desc">Analyze and compress LLM prompts for maximum efficiency without losing semantic integrity.</p>
                     <div class="card-foot">
                         <span class="card-tag">Tool</span>
                         <span class="card-status"><span class="status-dot status-live" aria-hidden="true"></span> Live</span>
@@ -596,7 +602,7 @@
                             </span>
                             <h3 class="card-name">AI for Legal Professionals</h3>
                         </div>
-                        <p class="card-desc">Apply AI to legal research, drafting, and analysis — the working intersection of law and machine intelligence.</p>
+                        <p class="card-desc">Apply AI to legal research, drafting, and analysis to modernize your workflows.</p>
                         <div class="card-foot">
                             <span class="card-tag">Course</span>
                             <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
@@ -620,7 +626,7 @@
                             </span>
                             <h3 class="card-name">AI Masterclass</h3>
                         </div>
-                        <p class="card-desc">A deep dive into advanced AI concepts, modern workflows, and practical, hands-on applications.</p>
+                        <p class="card-desc">A deep dive into advanced AI concepts, modern workflows, and practical applications.</p>
                         <div class="card-foot">
                             <span class="card-tag">Course</span>
                             <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
@@ -640,7 +646,50 @@
                             </span>
                             <h3 class="card-name">Cloud Masterclass</h3>
                         </div>
-                        <p class="card-desc">Master modern cloud architecture, scalable deployment strategies, and resilient infrastructure.</p>
+                        <p class="card-desc">Master modern cloud architecture, scalable deployment strategies, and infrastructure.</p>
+                        <div class="card-foot">
+                            <span class="card-tag">Course</span>
+                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
+                            <span class="card-cta">Enroll
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <a class="card card-course reveal e5" href="/python-masterclass/" target="_blank" rel="noopener noreferrer"
+                       aria-label="Open Python Masterclass — course, open, opens in a new tab">
+                        <div class="card-top">
+                            <span class="card-icon" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"></polyline>
+                                    <polyline points="8 6 2 12 8 18"></polyline>
+                                </svg>
+                            </span>
+                            <h3 class="card-name">Python Masterclass</h3>
+                        </div>
+                        <p class="card-desc">Learn advanced Python programming for data pipelines, automation, and AI systems.</p>
+                        <div class="card-foot">
+                            <span class="card-tag">Course</span>
+                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
+                            <span class="card-cta">Enroll
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <a class="card card-course reveal e6" href="/sql-masterclass/" target="_blank" rel="noopener noreferrer"
+                       aria-label="Open SQL Masterclass — course, open, opens in a new tab">
+                        <div class="card-top">
+                            <span class="card-icon" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                </svg>
+                            </span>
+                            <h3 class="card-name">SQL Masterclass</h3>
+                        </div>
+                        <p class="card-desc">Master database querying, structural data modeling, and robust relational design.</p>
                         <div class="card-foot">
                             <span class="card-tag">Course</span>
                             <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
@@ -654,7 +703,7 @@
         </section>
     </div>
 
-<footer>
+    <footer>
         <div class="wrap">
             <div class="footer-row mono">
                 <span class="left">
