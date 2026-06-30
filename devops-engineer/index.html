@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pipeline — Cloud-Native & DevOps Engineering Path</title>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  /* ink / sidebar */
+  --ink:#0B1220; --ink-2:#0F1A2B; --ink-3:#13203450; --ink-line:#1D2C42;
+  --on-ink:#C6D2E2; --on-ink-2:#8696AD; --on-ink-3:#5C6B82;
+  /* surfaces */
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#FAFBFD; --surface-3:#F2F5F9;
+  --border:#E4E9F0; --border-2:#D5DCE6;
+  /* text */
+  --text:#141E2C; --text-2:#46566A; --text-3:#7A899B;
+  /* brand + signals */
+  --brand:#2B57F0; --brand-2:#1B3CC0; --brand-soft:#EAF0FF; --brand-line:#CBD9FF;
+  --amber:#D9870C; --amber-soft:#FBEFD7; --amber-line:#F2D9A6;
+  --green:#0E9C66; --green-soft:#E1F4EB; --green-line:#BCE6D1;
+  --red:#DB433A; --red-soft:#FBEAE8; --red-line:#F3C9C5;
+  --violet:#7444D9; --violet-soft:#EFE8FC; --violet-line:#D9C9F5;
+  --teal:#0C9488; --teal-soft:#DEF3F1; --teal-line:#B4E2DD;
+  --steel:#5B6B7F; --steel-soft:#EBEEF2;
+  /* type */
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","SF Mono","Cascadia Code","Roboto Mono",Menlo,Consolas,monospace;
+  /* shape */
+  --r-sm:7px; --r:11px; --r-lg:16px; --r-xl:22px;
+  --sh-sm:0 1px 2px rgba(16,28,48,.06),0 1px 1px rgba(16,28,48,.04);
+  --sh:0 4px 14px rgba(16,28,48,.07),0 1px 3px rgba(16,28,48,.05);
+  --sh-lg:0 18px 48px rgba(13,24,44,.14),0 4px 12px rgba(13,24,44,.07);
+  --rail-w:288px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;font-family:var(--sans);background:var(--paper);color:var(--text);
+  font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+::selection{background:#2B57F0;color:#fff}
+
+/* ============ SIDEBAR RAIL ============ */
+.rail{
+  position:fixed;inset:0 auto 0 0;width:var(--rail-w);background:var(--ink);
+  border-right:1px solid var(--ink-line);display:flex;flex-direction:column;z-index:60;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.rail__brand{display:flex;align-items:center;gap:12px;padding:20px 20px 18px;border-bottom:1px solid var(--ink-line)}
+.brandmark{flex:none;width:38px;height:38px;border-radius:10px;background:linear-gradient(150deg,#2B57F0,#7444D9);
+  display:grid;place-items:center;box-shadow:0 6px 16px rgba(43,87,240,.35)}
+.brandmark svg{width:22px;height:22px}
+.brandtext{display:flex;flex-direction:column;line-height:1.1}
+.brandtext b{color:#fff;font-size:15px;letter-spacing:.2px;font-weight:700}
+.brandtext span{font-family:var(--mono);font-size:10.5px;color:var(--on-ink-2);letter-spacing:1.5px;margin-top:3px}
+.rail__nav{flex:1;overflow-y:auto;padding:14px 12px 26px;scrollbar-width:thin;scrollbar-color:#243348 transparent}
+.rail__nav::-webkit-scrollbar{width:8px}
+.rail__nav::-webkit-scrollbar-thumb{background:#22324a;border-radius:8px;border:2px solid var(--ink)}
+.rail__group{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--on-ink-3);
+  text-transform:uppercase;padding:18px 12px 8px;font-weight:600}
+.rail__group:first-child{padding-top:6px}
+.navlink{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:1px 0;border-radius:8px;
+  color:var(--on-ink);font-size:13.5px;font-weight:500;cursor:pointer;text-decoration:none;
+  border:1px solid transparent;transition:background .15s,color .15s}
+.navlink:hover{background:#16233a;color:#fff}
+.navlink.active{background:#1b2c47;color:#fff;border-color:#273a59}
+.navlink .ico{flex:none;width:16px;height:16px;color:var(--on-ink-2)}
+.navlink.active .ico{color:#7da2ff}
+
+/* pipeline nav */
+.pipeline{position:relative;margin:4px 0 4px 4px;padding-left:4px}
+.pipeline::before{content:"";position:absolute;left:18px;top:14px;bottom:14px;width:2px;
+  background:linear-gradient(180deg,#3a4a63,#2a384f)}
+.stage{position:relative;display:flex;align-items:center;gap:11px;padding:7px 10px 7px 8px;margin:1px 0;
+  border-radius:8px;color:var(--on-ink);font-size:13px;cursor:pointer;text-decoration:none;
+  border:1px solid transparent;transition:background .15s,color .15s,border-color .15s}
+.stage:hover{background:#16233a;color:#fff}
+.stage.active{background:#1b2c47;color:#fff;border-color:#28406a}
+.stage__dot{position:relative;z-index:2;flex:none;width:14px;height:14px;border-radius:50%;
+  background:var(--ink);border:2.5px solid var(--stg,#64748B);box-shadow:0 0 0 3px var(--ink)}
+.stage.active .stage__dot{background:var(--stg,#64748B);box-shadow:0 0 0 3px var(--ink),0 0 0 5px color-mix(in srgb,var(--stg) 35%,transparent)}
+.stage__num{font-family:var(--mono);font-size:10.5px;color:var(--on-ink-3);width:18px;flex:none}
+.stage.active .stage__num{color:var(--stg)}
+.stage__txt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ============ APP / TOPBAR ============ */
+.app{margin-left:var(--rail-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:40;height:60px;display:flex;align-items:center;gap:14px;
+  padding:0 28px;background:rgba(244,246,249,.82);backdrop-filter:saturate(160%) blur(12px);
+  border-bottom:1px solid var(--border)}
+.topbar__menu{display:none;width:40px;height:40px;border:1px solid var(--border-2);background:var(--surface);
+  border-radius:10px;cursor:pointer;align-items:center;justify-content:center;color:var(--text-2)}
+.topbar__menu svg{width:20px;height:20px}
+.crumb{font-family:var(--mono);font-size:12px;letter-spacing:.4px;color:var(--text-3);
+  display:flex;align-items:center;gap:8px;min-width:0}
+.crumb b{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb .sep{color:var(--border-2)}
+.topbar__spacer{flex:1}
+.trackpill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:.4px;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border-2);color:var(--text-2)}
+.trackpill i{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+
+/* ============ CONTENT ============ */
+.content{flex:1;padding:0}
+.view{display:none;max-width:1080px;margin:0 auto;padding:40px 40px 90px;animation:fade .35s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* eyebrow + headings */
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:2px;text-transform:uppercase;
+  font-weight:600;color:var(--brand);display:inline-flex;align-items:center;gap:9px;margin-bottom:14px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--brand);border-radius:2px}
+h1.title{font-size:clamp(30px,4.4vw,46px);line-height:1.08;letter-spacing:-1.1px;font-weight:800;margin:0 0 18px}
+.lede{font-size:19px;line-height:1.6;color:var(--text-2);max-width:70ch;margin:0 0 8px}
+h2{font-size:25px;letter-spacing:-.5px;font-weight:750;margin:52px 0 14px;scroll-margin-top:80px;
+  display:flex;align-items:baseline;gap:12px}
+h2 .h2num{font-family:var(--mono);font-size:13px;color:var(--brand);font-weight:600;letter-spacing:0}
+h3{font-size:18.5px;letter-spacing:-.2px;font-weight:700;margin:30px 0 10px}
+h4{font-size:15px;font-weight:700;margin:18px 0 8px;letter-spacing:.1px}
+p{margin:0 0 14px}
+.view a{color:var(--brand-2);text-decoration:none;border-bottom:1px solid var(--brand-line)}
+.view a:hover{border-bottom-color:var(--brand)}
+strong{font-weight:670;color:var(--text)}
+.muted{color:var(--text-3)}
+hr.div{border:none;border-top:1px solid var(--border);margin:42px 0}
+
+/* meta strip */
+.metastrip{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 6px}
+.metachip{display:inline-flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:9px 14px;box-shadow:var(--sh-sm)}
+.metachip .ml{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3)}
+.metachip .mv{font-size:13.5px;font-weight:650;color:var(--text)}
+.metachip svg{width:17px;height:17px;color:var(--brand);flex:none}
+
+/* lists */
+ul.clean{list-style:none;padding:0;margin:14px 0}
+ul.clean li{position:relative;padding:5px 0 5px 28px;color:var(--text-2)}
+ul.clean li::before{content:"";position:absolute;left:6px;top:13px;width:7px;height:7px;border-radius:2px;
+  background:var(--brand);transform:rotate(45deg)}
+ul.check li::before{content:"✓";left:2px;top:4px;width:auto;height:auto;background:none;transform:none;
+  color:var(--green);font-weight:800;font-size:14px}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+ol.steps>li{position:relative;padding:4px 0 16px 44px;color:var(--text-2)}
+ol.steps>li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:1px;width:28px;height:28px;
+  border-radius:8px;background:var(--brand-soft);color:var(--brand-2);font-family:var(--mono);font-weight:700;
+  font-size:13px;display:grid;place-items:center;border:1px solid var(--brand-line)}
+
+/* callouts */
+.call{position:relative;border-radius:var(--r);padding:16px 18px 16px 18px;margin:18px 0;border:1px solid;
+  display:flex;gap:13px;align-items:flex-start}
+.call .ci{flex:none;width:22px;height:22px;margin-top:1px}
+.call .cb{flex:1;min-width:0}
+.call .ct{font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;margin-bottom:5px;display:block}
+.call p:last-child{margin-bottom:0}
+.call.why{background:var(--brand-soft);border-color:var(--brand-line)} .call.why .ct,.call.why .ci{color:var(--brand-2)}
+.call.note{background:var(--surface-3);border-color:var(--border-2)} .call.note .ct,.call.note .ci{color:var(--steel)}
+.call.warn{background:var(--amber-soft);border-color:var(--amber-line)} .call.warn .ct,.call.warn .ci{color:var(--amber)}
+.call.pit{background:var(--red-soft);border-color:var(--red-line)} .call.pit .ct,.call.pit .ci{color:var(--red)}
+.call.best{background:var(--green-soft);border-color:var(--green-line)} .call.best .ct,.call.best .ci{color:var(--green)}
+
+/* analogy */
+.analogy{border-left:3px solid var(--violet);background:var(--violet-soft);border-radius:0 var(--r) var(--r) 0;
+  padding:14px 18px;margin:16px 0;color:#3d2c63}
+.analogy .ct{font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--violet);display:block;margin-bottom:4px}
+
+/* cards grid */
+.grid{display:grid;gap:16px;margin:18px 0}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh-sm)}
+.card h4{margin-top:0}
+.card .kic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;margin-bottom:12px;
+  background:var(--brand-soft);color:var(--brand-2)}
+.card .kic svg{width:18px;height:18px}
+
+/* concept block */
+.concept{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:22px 24px;margin:18px 0;box-shadow:var(--sh-sm)}
+.concept>h3:first-child{margin-top:0}
+.concept .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-3);background:var(--surface-3);border:1px solid var(--border);padding:3px 9px;border-radius:6px;margin-bottom:10px}
+
+/* terminal / lab */
+.term{background:#0C1322;border:1px solid #1d2c44;border-radius:var(--r);overflow:hidden;margin:16px 0;box-shadow:var(--sh)}
+.term__bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#0F1A2C;border-bottom:1px solid #1d2c44}
+.term__bar i{width:11px;height:11px;border-radius:50%}
+.term__bar i:nth-child(1){background:#ff5f57}.term__bar i:nth-child(2){background:#febc2e}.term__bar i:nth-child(3){background:#28c840}
+.term__name{margin-left:8px;font-family:var(--mono);font-size:11px;color:#6f81a0;letter-spacing:.4px}
+.term__body{margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;line-height:1.75;color:#d5e1f2}
+.term__body .cm{color:#5c7088;font-style:italic}
+.term__body .pr{color:#48d597}
+.term__body .fl{color:#f0b35e}
+.term__body .st{color:#8bd4ff}
+.term__body .kw{color:#c792ea}
+.term__body .ok{color:#3ddc97}
+.term__body .er{color:#ff7b72}
+
+/* inline code + pre */
+code{font-family:var(--mono);font-size:.86em;background:var(--surface-3);border:1px solid var(--border);
+  padding:1.5px 6px;border-radius:5px;color:#1b3a8a}
+pre.code{background:#0C1322;border:1px solid #1d2c44;border-radius:var(--r);padding:16px 18px;overflow-x:auto;
+  margin:16px 0;font-family:var(--mono);font-size:12.6px;line-height:1.7;color:#d5e1f2;box-shadow:var(--sh)}
+pre.code .cm{color:#5c7088;font-style:italic}
+pre.code .kw{color:#c792ea}
+pre.code .st{color:#9bd9a8}
+pre.code .key{color:#82aaff}
+pre.code .nu{color:#f0b35e}
+
+/* lab block wrapper */
+.lab{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin:20px 0;background:var(--surface);box-shadow:var(--sh-sm)}
+.lab__h{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+.lab__badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;color:#fff;background:var(--brand);
+  padding:4px 9px;border-radius:6px;flex:none}
+.lab__badge.proj{background:var(--violet)}
+.lab__t{font-weight:700;font-size:15px}
+.lab__time{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-3);flex:none}
+.lab__b{padding:18px 20px}
+.lab__b>:first-child{margin-top:0}.lab__b>:last-child{margin-bottom:0}
+
+/* mermaid */
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 18px;
+  margin:22px 0;text-align:center;box-shadow:var(--sh-sm);overflow-x:auto}
+.diagram .mermaid{display:flex;justify-content:center}
+.diagram__cap{font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:.4px;margin-top:14px;
+  padding-top:12px;border-top:1px dashed var(--border-2)}
+
+/* accordion */
+.acc{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:10px 0;background:var(--surface)}
+.acc summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:14.5px;list-style:none;display:flex;
+  align-items:center;gap:12px;transition:background .15s}
+.acc summary:hover{background:var(--surface-2)}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary .q{flex:none;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--brand);
+  background:var(--brand-soft);border:1px solid var(--brand-line);padding:3px 8px;border-radius:6px}
+.acc summary .chev{margin-left:auto;transition:transform .2s;color:var(--text-3)}
+.acc[open] summary .chev{transform:rotate(90deg)}
+.acc__body{padding:2px 18px 16px;color:var(--text-2);border-top:1px solid var(--border)}
+.acc__body>:first-child{margin-top:12px}
+
+/* badges row */
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text-2)}
+.badge svg{width:14px;height:14px}
+.badge.b-brand{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand-2)}
+.badge.b-green{background:var(--green-soft);border-color:var(--green-line);color:var(--green)}
+.badge.b-amber{background:var(--amber-soft);border-color:var(--amber-line);color:var(--amber)}
+.badge.b-violet{background:var(--violet-soft);border-color:var(--violet-line);color:var(--violet)}
+.badge.b-teal{background:var(--teal-soft);border-color:var(--teal-line);color:var(--teal)}
+
+/* resource links */
+.reslist{display:grid;gap:10px;margin:16px 0}
+.res{display:flex;align-items:center;gap:13px;padding:13px 16px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--sh-sm);transition:border-color .15s,transform .12s}
+.res:hover{border-color:var(--brand-line);transform:translateX(2px)}
+.res__ic{flex:none;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--surface-3);color:var(--brand-2)}
+.res__ic svg{width:18px;height:18px}
+.res__m{flex:1;min-width:0}
+.res__m b{display:block;font-size:14px;font-weight:650}
+.res__m span{font-size:12.5px;color:var(--text-3);font-family:var(--mono)}
+.res__tag{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;flex:none;
+  background:var(--green-soft);color:var(--green);border:1px solid var(--green-line)}
+
+/* prev / next */
+.pnav{display:flex;gap:14px;margin-top:54px;padding-top:26px;border-top:1px solid var(--border)}
+.pnav a{flex:1;text-decoration:none;border:1px solid var(--border);border-radius:var(--r);padding:15px 18px;
+  background:var(--surface);box-shadow:var(--sh-sm);transition:border-color .15s,box-shadow .15s;color:var(--text)}
+.pnav a:hover{border-color:var(--brand-line);box-shadow:var(--sh)}
+.pnav a.nx{text-align:right}
+.pnav .pl{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);display:block;margin-bottom:3px}
+.pnav .pt{font-weight:650;font-size:14.5px;color:var(--text)}
+.pnav a.dis{opacity:.45;pointer-events:none}
+
+/* hero pipeline */
+.hero{position:relative;background:linear-gradient(160deg,#0B1220 0%,#10203A 55%,#152949 100%);
+  border-radius:var(--r-xl);padding:42px 38px 36px;color:#fff;overflow:hidden;margin:8px 0 30px;box-shadow:var(--sh-lg)}
+.hero::after{content:"";position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 0);background-size:22px 22px;pointer-events:none}
+.hero__ey{font-family:var(--mono);font-size:11px;letter-spacing:2.5px;color:#7da2ff;text-transform:uppercase;font-weight:600}
+.hero h1{font-size:clamp(28px,4.6vw,44px);line-height:1.06;letter-spacing:-1.2px;font-weight:800;margin:14px 0 14px;color:#fff;position:relative}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,#7da2ff,#b69bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:#aebbd0;font-size:17px;max-width:62ch;margin:0;position:relative}
+.flow{display:flex;align-items:stretch;gap:0;margin:30px 0 4px;position:relative;flex-wrap:wrap}
+.flow__s{flex:1;min-width:120px;position:relative;padding:2px}
+.flow__c{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 12px;height:100%}
+.flow__k{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--fc,#7da2ff);font-weight:700;text-transform:uppercase}
+.flow__t{font-size:13.5px;font-weight:650;color:#fff;margin:7px 0 3px}
+.flow__m{font-size:11.5px;color:#8295b0;font-family:var(--mono)}
+.flow__s:not(:last-child)::after{content:"→";position:absolute;right:-7px;top:50%;transform:translateY(-50%);
+  color:#3a4d6e;font-size:16px;z-index:3}
+
+/* stat grid */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);
+  border-radius:var(--r-lg);overflow:hidden;margin:24px 0}
+.stat{background:var(--surface);padding:20px 18px;text-align:center}
+.stat b{display:block;font-size:30px;font-weight:800;letter-spacing:-1px;color:var(--text);font-feature-settings:"tnum"}
+.stat span{font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-top:4px;display:block}
+.stat b em{font-style:normal;font-size:18px;color:var(--brand);vertical-align:super}
+
+/* track legend */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0}
+.legend span{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);font-weight:500}
+.legend i{width:11px;height:11px;border-radius:50%}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm)}
+.tbl th{background:var(--surface-3);text-align:left;padding:11px 14px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.8px;text-transform:uppercase;color:var(--text-2);font-weight:700;border-bottom:1px solid var(--border)}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface-2)}
+
+/* footer */
+.foot{border-top:1px solid var(--border);padding:26px 40px;max-width:1080px;margin:0 auto;color:var(--text-3);font-size:12.5px;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono)}
+
+.rail-scrim{position:fixed;inset:0;background:rgba(8,14,26,.5);backdrop-filter:blur(2px);z-index:55;opacity:0;
+  visibility:hidden;transition:opacity .25s}
+.rail-scrim.show{opacity:1;visibility:visible}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1080px){.stats{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:920px){
+  .rail{transform:translateX(-100%)}
+  .rail.open{transform:none;box-shadow:var(--sh-lg)}
+  .app{margin-left:0}
+  .topbar__menu{display:flex}
+  .topbar{padding:0 16px}
+  .view{padding:26px 18px 80px}
+  .g2,.g3{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .flow__s{min-width:calc(50% - 4px);flex:none}
+  .flow__s::after{display:none}
+  .hero{padding:30px 22px 26px}
+  .pnav{flex-direction:column}
+}
+@media(max-width:520px){
+  .stats{grid-template-columns:1fr}
+  .metastrip{gap:8px}
+  .view{padding:22px 14px 70px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px;border-radius:4px}
+.navlink:focus-visible,.stage:focus-visible{outline-offset:-2px}
+</style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="rail" id="rail">
+  <div class="rail__brand">
+    <div class="brandmark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="16" cy="10" r="1.5" fill="#fff"/><circle cx="12" cy="15" r="1.5" fill="#fff"/><path d="M8 10h8M12 11.5V14" stroke="#fff" stroke-width="1.3"/></svg>
+    </div>
+    <div class="brandtext"><b>The Pipeline</b><span>DEVOPS // CLOUD-NATIVE</span></div>
+  </div>
+  <nav class="rail__nav" id="railnav">
+    <div class="rail__group">Getting Started</div>
+    <a class="navlink active" data-target="home"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8M5 9v11h14V9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Overview</a>
+    <a class="navlink" data-target="philosophy"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 7l7 4 7-4M5 17l7-4 7 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Learning Path</a>
+    <a class="navlink" data-target="tracks"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 7h7M4 12h16M4 17h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="7" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg>Engineer vs Architect</a>
+
+    <div class="rail__group">Curriculum · The Pipeline</div>
+    <div class="pipeline" id="pipeline"></div>
+
+    <div class="rail__group">Resources</div>
+    <a class="navlink" data-target="certs"><svg class="ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M9 13l-1.5 8L12 18l4.5 3L15 13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Certification Roadmap</a>
+    <a class="navlink" data-target="plan"><svg class="ico" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Weekly Study Plan</a>
+    <a class="navlink" data-target="library"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M4 5v15M4 5a2 2 0 0 1 2-2h6v17H6a2 2 0 0 0-2 2M20 5v15M20 5a2 2 0 0 0-2-2h-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Resource Library</a>
+  </nav>
+</aside>
+<div class="rail-scrim" id="scrim"></div>
+
+<!-- ============ APP ============ -->
+<div class="app">
+  <header class="topbar">
+    <button class="topbar__menu" id="menuBtn" aria-label="Toggle navigation"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div class="crumb"><span>~/learning-path</span><span class="sep">/</span><b id="crumbName">overview</b></div>
+    <div class="topbar__spacer"></div>
+    <span class="trackpill" id="trackPill"><i></i><span id="trackName">Getting Started</span></span>
+  </header>
+
+  <main class="content" id="content">
+
+<section class="view active" id="home">
+  <div class="hero">
+    <div class="hero__ey">From first command to cloud architect</div>
+    <h1>You are the artifact.<br>This course is the <em>pipeline</em> that ships you to production.</h1>
+    <p>A first-principles path from zero infrastructure experience to designing, securing, automating and operating enterprise cloud-native systems. Every module is a stage; you move through them the way code moves from a commit to a running, observed, scalable service.</p>
+    <div class="flow">
+      <div class="flow__s" style="--fc:#64748B"><div class="flow__c"><div class="flow__k">Source</div><div class="flow__t">Linux · Git</div><div class="flow__m">M01–02</div></div></div>
+      <div class="flow__s" style="--fc:#2B57F0"><div class="flow__c"><div class="flow__k">Build</div><div class="flow__t">Docker · K8s</div><div class="flow__m">M03–04</div></div></div>
+      <div class="flow__s" style="--fc:#2B57F0"><div class="flow__c"><div class="flow__k">Ship</div><div class="flow__t">CI/CD</div><div class="flow__m">M05</div></div></div>
+      <div class="flow__s" style="--fc:#0C9488"><div class="flow__c"><div class="flow__k">Provision</div><div class="flow__t">IaC · Cloud</div><div class="flow__m">M06–07</div></div></div>
+      <div class="flow__s" style="--fc:#0C9488"><div class="flow__c"><div class="flow__k">Observe</div><div class="flow__t">Telemetry · Sec</div><div class="flow__m">M08–09</div></div></div>
+      <div class="flow__s" style="--fc:#D9870C"><div class="flow__c"><div class="flow__k">Architect</div><div class="flow__t">Design · Ops</div><div class="flow__m">M10–12</div></div></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>12</b><span>Modules</span></div>
+    <div class="stat"><b>200<em>h</em></b><span>Guided hours</span></div>
+    <div class="stat"><b>40<em>+</em></b><span>Hands-on labs</span></div>
+    <div class="stat"><b>11</b><span>Capstones</span></div>
+    <div class="stat"><b>10<em>+</em></b><span>Certs mapped</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>What this is</h2>
+  <p>This is a full <strong>DevOps bootcamp fused with a Cloud Architecture specialization</strong> — roughly 150–250 hours of guided, practical learning. It does not stop at "here is the command." Every concept is taught from first principles: <em>why it exists, what problem it solves, why enterprises adopt it, when not to use it, and what the trade-offs cost you</em> in money, reliability, and security.</p>
+  <p>The same systems run at Netflix, Stripe, Uber, Spotify, Airbnb and Shopify; throughout the course you will see how those companies actually solve the problem you are studying, so the patterns stick to something real.</p>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The mental model</span><p>Software delivery is a manufacturing line. Code is raw material; containers are standardized shipping units; Kubernetes is the warehouse robot fleet; CI/CD is the conveyor belt; observability is quality control; the cloud is the rented factory. Hold that picture and every tool below has an obvious place.</p></div></div>
+
+  <h2><span class="h2num">02</span>Who it's for</h2>
+  <div class="grid g3">
+    <div class="card"><div class="kic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v6m0 0 3-2m-3 2L9 6M5 12H2m20 0h-3M6.3 6.3 4.2 4.2m15.6 2.1 2.1-2.1M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.5"/></svg></div><h4>Complete beginners</h4><p class="muted" style="font-size:14px">No Linux, cloud or infra background needed. Module 1 starts at "what is a terminal."</p></div>
+    <div class="card"><div class="kic"><svg viewBox="0 0 24 24" fill="none"><path d="m8 6-6 6 6 6M16 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Developers moving to DevOps</h4><p class="muted" style="font-size:14px">You can code, but pipelines, clusters and infra are a black box. This makes them concrete.</p></div>
+    <div class="card"><div class="kic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21V8l9-5 9 5v13M3 21h18M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4>Engineers eyeing architect roles</h4><p class="muted" style="font-size:14px">The later modules and the parallel Architect track focus on system design, governance and cost.</p></div>
+  </div>
+
+  <h2><span class="h2num">03</span>How to use it</h2>
+  <ol class="steps">
+    <li><strong>Move through the pipeline in order.</strong> Each stage assumes the one before it. The colored rail on the left shows your journey from Foundations (steel) to Architect (amber).</li>
+    <li><strong>Do the labs, don't just read them.</strong> The terminal cards are meant to be typed out in a real sandbox. Reading a <code>kubectl</code> command teaches nothing; breaking a cluster teaches everything.</li>
+    <li><strong>Build the projects.</strong> Every module ends in something deployable. Push it to a public GitHub repo — that repo becomes your portfolio.</li>
+    <li><strong>Map to a certification.</strong> Each module lists the exam objectives it covers (CKA, CKAD, Terraform Associate, AWS/Azure/GCP). Use the <strong>Certification Roadmap</strong> to sequence them.</li>
+    <li><strong>Follow the cadence.</strong> The <strong>Weekly Study Plan</strong> turns 200 hours into a realistic 12–16 week schedule at ~12–15 h/week.</li>
+  </ol>
+
+  <h2><span class="h2num">04</span>The five tracks of the pipeline</h2>
+  <p>The twelve modules group into five colored phases. Each phase changes what kind of engineer you are.</p>
+  <div class="legend">
+    <span><i style="background:#64748B"></i> Foundations · M01–02</span>
+    <span><i style="background:#2B57F0"></i> Build &amp; Ship · M03–05</span>
+    <span><i style="background:#0C9488"></i> Provision &amp; Observe · M06–08</span>
+    <span><i style="background:#7444D9"></i> Secure &amp; Design · M09–10</span>
+    <span><i style="background:#D9870C"></i> Operate &amp; Capstone · M11–12</span>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Outcome</span><p>By the end you can take a raw application and: containerize it, ship it through an automated pipeline onto a highly-available Kubernetes cluster, provision the whole cloud footprint as code across AWS/Azure/GCP, secure the supply chain, instrument it with metrics/logs/traces, and defend the architecture — cost, reliability and DR included — to an executive.</p></div></div>
+
+  <div class="pnav"><a class="dis"><span class="pl">Prev</span><span class="pt">—</span></a><a class="nx" data-target="philosophy"><span class="pl">Next</span><span class="pt">Learning Path →</span></a></div>
+</section>
+
+<section class="view" id="philosophy">
+  <div class="eyebrow">Method</div>
+  <h1 class="title">The learning path &amp; teaching method</h1>
+  <p class="lede">Ten phases of progression, one rule: every chapter is built so it can only be understood <em>because</em> you understood the last one. No leaps, no assumed knowledge.</p>
+
+  <h2><span class="h2num">01</span>The progression</h2>
+  <p>The course is engineered as a ramp, not a reference manual. You climb through ten escalating phases:</p>
+  <table class="tbl">
+    <tr><th style="width:38px">#</th><th>Phase</th><th>What changes in you</th></tr>
+    <tr><td>1</td><td>Beginner fundamentals</td><td>You stop fearing the terminal and the cloud.</td></tr>
+    <tr><td>2</td><td>Intermediate practical skills</td><td>You can build and run real containerized apps.</td></tr>
+    <tr><td>3</td><td>Advanced engineering</td><td>You operate clusters and write production pipelines.</td></tr>
+    <tr><td>4</td><td>Enterprise architecture</td><td>You design systems, not just deploy them.</td></tr>
+    <tr><td>5</td><td>Production best practices</td><td>You make choices that survive 3 a.m. incidents.</td></tr>
+    <tr><td>6</td><td>Real-world projects</td><td>You have a portfolio of deployable systems.</td></tr>
+    <tr><td>7</td><td>Interview preparation</td><td>You can explain trade-offs under pressure.</td></tr>
+    <tr><td>8</td><td>Industry certifications</td><td>You hold credentials employers filter on.</td></tr>
+    <tr><td>9</td><td>Case studies</td><td>You reason from how real companies solved it.</td></tr>
+    <tr><td>10</td><td>Future trends</td><td>You can place new tools in a stable mental model.</td></tr>
+  </table>
+
+  <h2><span class="h2num">02</span>First-principles, always</h2>
+  <p>Most material teaches <em>how</em>: "run this command." That produces engineers who are helpless the moment reality differs from the tutorial. This course refuses that. For every technology you will always get six things:</p>
+  <ul class="clean">
+    <li><strong>Why it exists</strong> — the pain that created it.</li>
+    <li><strong>What problem it solves</strong> — stated in plain business terms.</li>
+    <li><strong>Why enterprises adopt it</strong> — the scale or risk that justifies the complexity.</li>
+    <li><strong>When <em>not</em> to use it</strong> — the cases where it is over-engineering.</li>
+    <li><strong>Alternatives</strong> — what else solves the same problem and how they differ.</li>
+    <li><strong>Business impact</strong> — what it costs and what it earns.</li>
+  </ul>
+
+  <div class="analogy"><span class="ct">Why this matters</span>An engineer who only knows <code>kubectl apply</code> is a button. An engineer who knows <em>why</em> Kubernetes uses a declarative reconciliation loop can debug it, replace it, and decide when a Lambda would have been cheaper. The second engineer gets paid twice as much. This course builds the second engineer.</div>
+
+  <h2><span class="h2num">03</span>What every module gives you</h2>
+  <div class="grid g2">
+    <div class="card"><h4>Concept layer</h4><ul class="clean" style="margin:6px 0"><li>Plain-English explanation before any jargon</li><li>Real-world analogy</li><li>Architecture &amp; flow diagrams</li><li>Internal working &amp; data flow</li></ul></div>
+    <div class="card"><h4>Practice layer</h4><ul class="clean" style="margin:6px 0"><li>Guided labs with real commands</li><li>A deployable project</li><li>Troubleshooting / debugging scenarios</li><li>Reflection questions</li></ul></div>
+    <div class="card"><h4>Production layer</h4><ul class="clean" style="margin:6px 0"><li>Common mistakes &amp; anti-patterns</li><li>Best practices &amp; production recommendations</li><li>Security, cost, scaling, reliability notes</li><li>Decision-making frameworks</li></ul></div>
+    <div class="card"><h4>Career layer</h4><ul class="clean" style="margin:6px 0"><li>Certification objective mapping</li><li>Interview questions with answers</li><li>Curated free / open-source resources</li><li>Real customer implementations</li></ul></div>
+  </div>
+
+  <h2><span class="h2num">04</span>A note on resources</h2>
+  <p>Everything recommended in this course is <strong>free or open-source</strong> wherever a free option exists: official documentation, open-source projects, public datasets, free cloud sandboxes and community tooling. You can complete the entire path without paying for a course platform — only optional certification exams cost money.</p>
+
+  <div class="pnav"><a data-target="home"><span class="pl">Prev</span><span class="pt">← Overview</span></a><a class="nx" data-target="tracks"><span class="pl">Next</span><span class="pt">Engineer vs Architect →</span></a></div>
+</section>
+
+<section class="view" id="tracks">
+  <div class="eyebrow">Two career tracks</div>
+  <h1 class="title">Cloud Engineer vs Cloud Architect</h1>
+  <p class="lede">The same curriculum serves two destinations. The early modules build the <strong>Engineer</strong>; the later modules and the architectural lens throughout build the <strong>Architect</strong>. Knowing which you are aiming for changes how you study.</p>
+
+  <div class="grid g2">
+    <div class="card" style="border-top:3px solid var(--brand)">
+      <div class="kic"><svg viewBox="0 0 24 24" fill="none"><path d="m8 6-6 6 6 6M16 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3 style="margin-top:4px">The Cloud / DevOps Engineer</h3>
+      <p class="muted" style="font-size:14px">Builds and runs the system. Lives in the terminal and the pipeline. Measured on shipping working software reliably.</p>
+      <ul class="clean" style="margin:8px 0"><li>Writes Dockerfiles &amp; optimizes images</li><li>Builds CI/CD pipelines</li><li>Deploys &amp; operates Kubernetes</li><li>Writes Terraform modules</li><li>Debugs infrastructure incidents</li><li>Implements monitoring &amp; alerts</li></ul>
+      <div class="badges"><span class="badge b-brand">Hands-on</span><span class="badge b-brand">Implementation</span><span class="badge b-brand">Modules 1–9</span></div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--amber)">
+      <div class="kic" style="background:var(--amber-soft);color:var(--amber)"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21V8l9-5 9 5v13M3 21h18M9 21v-6h6v6M7 11h.01M17 11h.01" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <h3 style="margin-top:4px">The Cloud Architect</h3>
+      <p class="muted" style="font-size:14px">Decides what to build and why. Lives in diagrams, trade-off tables and executive rooms. Measured on systems that scale, survive and stay affordable.</p>
+      <ul class="clean" style="margin:8px 0"><li>Designs scalable, resilient systems</li><li>Selects technologies &amp; vendors</li><li>Owns security &amp; DR architecture</li><li>Drives cost optimization &amp; governance</li><li>Plans multi-region &amp; HA strategy</li><li>Communicates with executives</li></ul>
+      <div class="badges"><span class="badge b-amber">Strategy</span><span class="badge b-amber">Design</span><span class="badge b-amber">Modules 10–12</span></div>
+    </div>
+  </div>
+
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The honest truth</span><p>You cannot architect what you have never operated. Every strong architect was first an engineer who felt the pain of bad decisions at 3 a.m. Do the engineering modules properly even if "architect" is your goal — the trade-off intuition you need is forged there, not in slides.</p></div></div>
+
+  <h2><span class="h2num">01</span>How the same task looks at each level</h2>
+  <table class="tbl">
+    <tr><th>Situation</th><th>Engineer asks</th><th>Architect asks</th></tr>
+    <tr><td>New service to deploy</td><td>Which base image and how many replicas?</td><td>Should this be a service at all, or an event consumer / serverless function?</td></tr>
+    <tr><td>Traffic is growing</td><td>How do I add an HPA and node autoscaling?</td><td>What is the cost curve at 10×, and where does this architecture break?</td></tr>
+    <tr><td>A region went down</td><td>How do I fail traffic over to the standby?</td><td>What RTO/RPO did we promise, and does the spend match the risk?</td></tr>
+    <tr><td>Security review</td><td>How do I scan images and rotate secrets?</td><td>What is our supply-chain threat model and compliance boundary?</td></tr>
+  </table>
+
+  <div class="pnav"><a data-target="philosophy"><span class="pl">Prev</span><span class="pt">← Learning Path</span></a><a class="nx" data-target="m1"><span class="pl">Next</span><span class="pt">Module 01 · Linux →</span></a></div>
+</section>
+
+<section class="view" id="m1">
+  <div class="eyebrow">Module 01 · Foundations</div>
+  <h1 class="title">Linux Foundations</h1>
+  <p class="lede">Every container, every server, every Kubernetes node is Linux. If Linux is a mystery, everything above it is magic — and you cannot debug magic. This module makes the operating system concrete.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ml">Level</span><span class="mv">Beginner</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">18–22 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ml">Prereq</span><span class="mv">None</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <p>By the end of this module you will be able to:</p>
+  <ul class="clean check">
+    <li>Navigate the filesystem, manage files, and read any path on sight</li>
+    <li>Understand the user / group / other permission model and fix "permission denied"</li>
+    <li>Inspect and control processes, signals, and resource usage</li>
+    <li>Read and configure basic Linux networking (interfaces, ports, DNS, firewall)</li>
+    <li>Install and manage software with <code>apt</code>/<code>yum</code>/<code>dnf</code></li>
+    <li>Write Bash scripts that automate real server tasks with variables, loops, conditionals and functions</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Why Linux runs the cloud</span><p>Linux is free, open-source, endlessly scriptable, and stripped down it boots in milliseconds with almost no overhead. That is exactly what you want when you are launching ten thousand identical machines. Over 90% of cloud workloads and effectively all container images are Linux. Windows can be skipped at the start; Linux cannot.</p></div></div>
+
+  <h2><span class="h2num">02</span>Core concepts</h2>
+
+  <div class="concept">
+    <span class="tag">Concept 01</span>
+    <h3>Everything is a file</h3>
+    <p>Linux's founding idea: a hard disk, a network socket, a running process, even your keyboard — the kernel exposes nearly all of them as <strong>files</strong> you can read from and write to. This is why the same handful of tools (<code>cat</code>, <code>grep</code>, <code>&gt;</code>) work on everything.</p>
+    <div class="analogy"><span class="ct">Analogy</span>Think of the OS as a giant building where every room, pipe and switch has the same kind of door handle. Learn one handle and you can open the whole building.</div>
+  </div>
+
+  <div class="concept">
+    <span class="tag">Concept 02</span>
+    <h3>The filesystem hierarchy</h3>
+    <p>There are no drive letters. Everything hangs off a single root <code>/</code>. The important branches: <code>/etc</code> (configuration), <code>/var</code> (logs &amp; changing data), <code>/home</code> (user files), <code>/usr</code> (installed programs), <code>/tmp</code> (scratch), <code>/proc</code> &amp; <code>/sys</code> (live kernel state as files), <code>/bin</code> &amp; <code>/sbin</code> (essential commands).</p>
+  </div>
+
+  <div class="concept">
+    <span class="tag">Concept 03</span>
+    <h3>Permissions: user, group, other</h3>
+    <p>Every file has an owner, a group, and three permission triplets — read (4), write (2), execute (1). <code>chmod 750 deploy.sh</code> means: owner can do everything (7=4+2+1), group can read &amp; execute (5), everyone else gets nothing (0). This single idea is behind most "it works on my machine but not on the server" failures.</p>
+  </div>
+
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TB
+  U["You — the User / Shell (bash, zsh)"]:::u
+  S["Shell interprets your command<br/>expands variables, globs, pipes"]:::s
+  K["Kernel — schedules CPU, manages memory,<br/>talks to devices, enforces permissions"]:::k
+  H["Hardware — CPU · RAM · Disk · Network"]:::h
+  U -->|"types: ls -l /var"| S
+  S -->|"syscall: openat, read"| K
+  K -->|"electrical signals"| H
+  H -->|"bytes"| K --> S -->|"prints result"| U
+  classDef u fill:#EAF0FF,stroke:#2B57F0,color:#1B3CC0,stroke-width:1.5px;
+  classDef s fill:#EFE8FC,stroke:#7444D9,color:#3d2c63,stroke-width:1.5px;
+  classDef k fill:#FBEFD7,stroke:#D9870C,color:#7a4a06,stroke-width:1.5px;
+  classDef h fill:#E1F4EB,stroke:#0E9C66,color:#0a5c3c,stroke-width:1.5px;
+    </pre>
+    <div class="diagram__cap">Fig 1.1 — How a single command travels from your fingers to the metal and back</div>
+  </div>
+
+  <h2><span class="h2num">03</span>Hands-on labs</h2>
+
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge">LAB 1.1</span><span class="lab__t">Filesystem &amp; permissions tour</span><span class="lab__time">~30 min</span></div>
+    <div class="lab__b">
+      <p>Spin up a free sandbox (<a href="https://killercoda.com">killercoda.com</a> or any Ubuntu VM) and run:</p>
+      <div class="term"><div class="term__bar"><i></i><i></i><i></i><span class="term__name">bash — ubuntu</span></div><pre class="term__body"><span class="cm"># where am I, what's here, who am I</span>
+<span class="pr">$</span> pwd && ls -la && whoami
+<span class="cm"># make a project, inspect permission bits</span>
+<span class="pr">$</span> mkdir -p app/logs && touch app/run.sh
+<span class="pr">$</span> ls -l app          <span class="cm"># note the -rw-r--r-- string</span>
+<span class="cm"># make the script executable for the owner only</span>
+<span class="pr">$</span> chmod 744 app/run.sh && ls -l app/run.sh
+<span class="cm"># follow live kernel state — every process is a folder</span>
+<span class="pr">$</span> ls /proc | head && cat /proc/cpuinfo | grep -m1 "model name"</pre></div>
+      <p class="muted" style="font-size:14px"><strong>Reflect:</strong> why does <code>/proc/cpuinfo</code> have a size of 0 but still print content?</p>
+    </div>
+  </div>
+
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge">LAB 1.2</span><span class="lab__t">Processes, pipes &amp; networking</span><span class="lab__time">~30 min</span></div>
+    <div class="lab__b">
+      <div class="term"><div class="term__bar"><i></i><i></i><i></i><span class="term__name">bash — ubuntu</span></div><pre class="term__body"><span class="cm"># top processes by memory, the Unix way: compose small tools</span>
+<span class="pr">$</span> ps aux --sort=-%mem | head -5
+<span class="cm"># what's listening on which port?</span>
+<span class="pr">$</span> sudo ss -tlnp
+<span class="cm"># can I reach the world? resolve DNS + check route</span>
+<span class="pr">$</span> dig +short github.com && ip route
+<span class="cm"># send a signal: start, find, gracefully stop a process</span>
+<span class="pr">$</span> sleep 300 & ; jobs -l
+<span class="pr">$</span> kill -TERM %1</pre></div>
+    </div>
+  </div>
+
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Server bootstrap automation script</span><span class="lab__time">~3–4 h</span></div>
+    <div class="lab__b">
+      <p>Write <code>bootstrap.sh</code> that prepares a fresh Ubuntu server: updates packages, creates a non-root deploy user, installs a web server, opens the firewall, and logs every step. This is the seed of all infrastructure automation.</p>
+      <pre class="code"><span class="cm">#!/usr/bin/env bash</span>
+<span class="cm"># bootstrap.sh — idempotent server setup. Run: sudo ./bootstrap.sh</span>
+<span class="kw">set</span> -euo pipefail              <span class="cm"># fail fast, fail loud</span>
+LOG=<span class="st">"/var/log/bootstrap.log"</span>
+log(){ <span class="kw">echo</span> <span class="st">"[$(date -Is)] $*"</span> | tee -a <span class="st">"$LOG"</span>; }
+
+log <span class="st">"Updating package index"</span>
+apt-get update -y && apt-get upgrade -y
+
+<span class="kw">if</span> ! id deploy &>/dev/null; <span class="kw">then</span>
+  log <span class="st">"Creating deploy user"</span>
+  useradd -m -s /bin/bash deploy
+<span class="kw">fi</span>
+
+<span class="kw">for</span> pkg <span class="kw">in</span> nginx ufw curl; <span class="kw">do</span>
+  log <span class="st">"Installing $pkg"</span>; apt-get install -y <span class="st">"$pkg"</span>
+<span class="kw">done</span>
+
+log <span class="st">"Configuring firewall"</span>
+ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
+log <span class="st">"Done. Nginx status: $(systemctl is-active nginx)"</span></pre>
+      <p class="muted" style="font-size:14px"><strong>Extend it:</strong> make it accept the package list as arguments; add a <code>--dry-run</code> flag; re-run it twice and confirm it changes nothing the second time (idempotency).</p>
+    </div>
+  </div>
+
+  <h2><span class="h2num">04</span>Common mistakes &amp; best practices</h2>
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Anti-patterns</span><p><strong>Running everything as root</strong> (one typo wipes the box) · <strong><code>chmod 777</code> to "fix" permissions</strong> (it's a security hole, not a fix) · <strong>parsing <code>ls</code> output in scripts</strong> (it breaks on spaces — use globs/<code>find</code>) · <strong>not quoting variables</strong> (<code>"$var"</code> not <code>$var</code>).</p></div></div>
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Production habits</span><p>Always start scripts with <code>set -euo pipefail</code>. Prefer least-privilege users. Make scripts idempotent. Log with timestamps. Use <code>shellcheck</code> on every script before committing.</p></div></div>
+
+  <h2><span class="h2num">05</span>Certification mapping</h2>
+  <div class="badges"><span class="badge b-green">LFCS — partial</span><span class="badge b-green">CompTIA Linux+</span><span class="badge b-brand">Foundation for CKA/CKAD</span><span class="badge">RHCSA — intro</span></div>
+
+  <h2><span class="h2num">06</span>Interview preparation</h2>
+  <details class="acc"><summary><span class="q">Q1</span>What's the difference between a hard link and a symbolic link?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>A <strong>hard link</strong> is a second name pointing at the same inode (same physical data); delete the original and the data survives. A <strong>symbolic link</strong> is a tiny file containing a path to another file; delete the target and the symlink dangles. Hard links can't cross filesystems or link directories; symlinks can do both.</p></div></details>
+  <details class="acc"><summary><span class="q">Q2</span>A process is stuck. Walk me through diagnosing it.<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>Find it with <code>ps</code>/<code>top</code>; check state (R/S/D/Z) — <strong>D</strong> means uninterruptible I/O wait, often disk/NFS. Inspect open files with <code>lsof -p PID</code>, syscalls with <code>strace -p PID</code>, and resource limits. Try <code>kill -TERM</code> (graceful) before <code>kill -KILL</code> (forced). A <strong>Z</strong>ombie means the parent never reaped it — fix the parent.</p></div></details>
+  <details class="acc"><summary><span class="q">Q3</span>Explain what happens between typing a command and seeing output.<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>The shell parses the line, expands variables/globs, resolves the binary via <code>$PATH</code>, then <code>fork()</code>s and <code>exec()</code>s it. The kernel schedules the new process, which makes system calls (e.g. <code>read</code>) the kernel services by talking to hardware. Output is written to the file descriptor for stdout, which the terminal renders.</p></div></details>
+
+  <h2><span class="h2num">07</span>Free resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>The Linux Command Line (William Shotts)</b><span>linuxcommand.org · free book</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="m10 8 6 4-6 4V8Z" fill="currentColor"/><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>OverTheWire: Bandit</b><span>overthewire.org · gamified shell practice</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9l3 2-3 2M12 14h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="res__m"><b>Killercoda interactive Linux scenarios</b><span>killercoda.com · in-browser terminal</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="res__m"><b>ShellCheck</b><span>shellcheck.net · lint your bash automatically</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="tracks"><span class="pl">Prev</span><span class="pt">← Engineer vs Architect</span></a><a class="nx" data-target="m2"><span class="pl">Next</span><span class="pt">Module 02 · Git &amp; GitHub →</span></a></div>
+</section>
+
+<section class="view" id="m2">
+  <div class="eyebrow">Module 02 · Foundations</div>
+  <h1 class="title">Git &amp; GitHub</h1>
+  <p class="lede">Git is the time machine and the collaboration layer for everything you will build. In modern DevOps the Git repository is the single source of truth — pipelines, infrastructure and deployments all trigger from it. Master Git and you've mastered the trigger for the entire pipeline.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ml">Level</span><span class="mv">Beginner</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">12–16 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Module 1</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Explain Git's three states (working dir → staging → committed) and the object model</li>
+    <li>Branch, merge, rebase, and resolve merge conflicts without panic</li>
+    <li>Choose between Git Flow and trunk-based development for a given team</li>
+    <li>Run a professional Pull Request &amp; code-review workflow</li>
+    <li>Use tags, releases, and <code>.gitignore</code> correctly</li>
+    <li>Recover from mistakes with <code>reflog</code>, <code>revert</code>, and <code>reset</code></li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Why Git won</span><p>Before Git, teams emailed zip files and overwrote each other's work. Git is <strong>distributed</strong> — every clone is a full backup with complete history — and it makes branching nearly free, so a hundred developers can work in parallel and reconcile their work safely. GitOps takes this further: the Git repo becomes the literal definition of what's running in production.</p></div></div>
+
+  <h2><span class="h2num">02</span>Core concepts</h2>
+  <div class="concept"><span class="tag">Concept 01</span><h3>The three areas</h3><p>A file moves through three places: the <strong>working directory</strong> (your edits), the <strong>staging area / index</strong> (changes marked for the next snapshot), and the <strong>repository</strong> (committed history). <code>git add</code> stages; <code>git commit</code> snapshots. Understanding this removes 80% of Git confusion.</p></div>
+  <div class="concept"><span class="tag">Concept 02</span><h3>Commits are snapshots, not diffs</h3><p>Each commit is a full snapshot of your tree plus a pointer to its parent, identified by a SHA hash. A <strong>branch is just a movable pointer</strong> to a commit. That's why branching is instant — Git only writes a tiny pointer file.</p><div class="analogy"><span class="ct">Analogy</span>Commits are save points in a video game. A branch is a bookmark to a save point. Switching branches reloads that save; merging combines two playthroughs.</div></div>
+  <div class="concept"><span class="tag">Concept 03</span><h3>Merge vs rebase</h3><p><strong>Merge</strong> ties two histories together with a merge commit — it preserves exactly what happened. <strong>Rebase</strong> replays your commits on top of another branch — it rewrites history for a clean, linear log. Rule of thumb: rebase your <em>local</em> work to tidy it; never rebase commits others have already pulled.</p></div>
+
+  <div class="diagram">
+    <pre class="mermaid">
+gitGraph
+   commit id: "init"
+   commit id: "feat-a"
+   branch feature-login
+   checkout feature-login
+   commit id: "form"
+   commit id: "validation"
+   checkout main
+   commit id: "hotfix"
+   merge feature-login id: "PR #42 merged"
+   commit id: "release v1.0" tag: "v1.0"
+    </pre>
+    <div class="diagram__cap">Fig 2.1 — A feature branch created, developed in parallel, reviewed via PR, and merged back to main</div>
+  </div>
+
+  <h2><span class="h2num">03</span>Branching strategies — a decision framework</h2>
+  <table class="tbl">
+    <tr><th>Strategy</th><th>Best for</th><th>Trade-off</th></tr>
+    <tr><td><strong>Trunk-based</strong></td><td>High-velocity teams with strong CI &amp; feature flags (Google, most startups)</td><td>Demands excellent automated tests &amp; discipline; tiny short-lived branches.</td></tr>
+    <tr><td><strong>Git Flow</strong></td><td>Versioned/released software with formal release cycles</td><td>Many long-lived branches; heavier, slower, more merge pain.</td></tr>
+    <tr><td><strong>GitHub Flow</strong></td><td>Continuously deployed web apps</td><td>Simple (branch → PR → deploy) but assumes deploy-on-merge.</td></tr>
+  </table>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Industry reality</span><p>Most elite-performing teams in the DORA research use <strong>trunk-based development</strong> with short-lived branches and feature flags, because long-lived branches are where integration pain compounds. Reach for Git Flow only when you genuinely ship versioned releases.</p></div></div>
+
+  <h2><span class="h2num">04</span>Hands-on labs</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge">LAB 2.1</span><span class="lab__t">Branch, conflict, resolve</span><span class="lab__time">~40 min</span></div>
+    <div class="lab__b">
+      <div class="term"><div class="term__bar"><i></i><i></i><i></i><span class="term__name">git</span></div><pre class="term__body"><span class="pr">$</span> git init demo && cd demo
+<span class="pr">$</span> echo "v1" > app.txt && git add . && git commit -m "init"
+<span class="cm"># two branches edit the SAME line -> a conflict</span>
+<span class="pr">$</span> git switch -c feature && echo "feature change" > app.txt && git commit -am "feat"
+<span class="pr">$</span> git switch main && echo "main change" > app.txt && git commit -am "main"
+<span class="pr">$</span> git merge feature        <span class="cm"># CONFLICT — open app.txt, pick the right content</span>
+<span class="pr">$</span> git add app.txt && git commit   <span class="cm"># conflict resolved</span>
+<span class="cm"># the safety net: see EVERY move you've made</span>
+<span class="pr">$</span> git reflog</pre></div>
+    </div>
+  </div>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Multi-developer collaboration simulation</span><span class="lab__time">~3 h</span></div>
+    <div class="lab__b">
+      <p>On GitHub: create a repo, protect <code>main</code> (require PR + 1 review + passing checks), then simulate two contributors. Each opens a feature branch, raises a PR, requests review, addresses comments, and merges. Add a <code>CODEOWNERS</code> file and a PR template. You now have the exact workflow used at every serious engineering org.</p>
+      <ul class="clean"><li>Enable branch protection rules on <code>main</code></li><li>Open 2 PRs that touch overlapping files; resolve the conflict in the PR</li><li>Add a GitHub Actions check so PRs can't merge while tests fail (foreshadows Module 5)</li><li>Tag a release: <code>git tag -a v1.0 -m "first release" &amp;&amp; git push --tags</code></li></ul>
+    </div>
+  </div>
+
+  <h2><span class="h2num">05</span>Common mistakes &amp; recovery</h2>
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Anti-patterns</span><p><strong>Committing secrets</strong> (<code>.env</code>, keys) — they live in history forever; use <code>.gitignore</code> + secret scanning · <strong>giant commits</strong> ("fixed stuff") · <strong>force-pushing shared branches</strong> · <strong>committing build artifacts</strong> · <strong>using <code>reset --hard</code> without understanding it</strong>.</p></div></div>
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Recovery cheat</span><p>Undo a public commit safely: <code>git revert &lt;sha&gt;</code> (new commit that reverses it). Recover "lost" work: <code>git reflog</code> then <code>git checkout &lt;sha&gt;</code>. Unstage: <code>git restore --staged &lt;file&gt;</code>. There is almost nothing in Git you cannot undo — that's the whole point.</p></div></div>
+
+  <h2><span class="h2num">06</span>Certification &amp; interview</h2>
+  <div class="badges"><span class="badge b-green">GitHub Foundations</span><span class="badge b-green">GitHub Actions (later)</span></div>
+  <details class="acc"><summary><span class="q">Q1</span>Difference between <code>git merge</code> and <code>git rebase</code>, and when do you use each?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>Merge preserves true history with a merge commit; rebase rewrites your commits onto a new base for a linear history. Use rebase to clean up local commits before sharing; use merge to integrate completed, reviewed branches. Golden rule: never rebase commits that already exist on a remote others use.</p></div></details>
+  <details class="acc"><summary><span class="q">Q2</span>How do you remove a secret accidentally committed two weeks ago?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>Deleting it in a new commit is <em>not</em> enough — it's still in history. You must rewrite history with <code>git filter-repo</code> (or BFG), force-push, and — critically — <strong>rotate the secret</strong>, because you must assume it's already compromised. Then add it to <code>.gitignore</code> and enable push protection / secret scanning.</p></div></details>
+
+  <h2><span class="h2num">07</span>Free resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Pro Git (Chacon &amp; Straub)</b><span>git-scm.com/book · the definitive free book</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="18" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="9" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M6 8.4v7.2M8.2 7 16 8.6" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Learn Git Branching</b><span>learngitbranching.js.org · visual interactive</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a4 4 0 0 1 1-2.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .6 1.4.2 2.4.1 2.7a4 4 0 0 1 1 2.7c0 3.9-2.3 4.8-4.6 5 .4.3.7.9.7 1.8v2.6c0 .3.2.6.7.5A10 10 0 0 0 12 2Z" fill="currentColor"/></svg></div><div class="res__m"><b>GitHub Skills</b><span>skills.github.com · hands-on courses</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m1"><span class="pl">Prev</span><span class="pt">← Module 01 · Linux</span></a><a class="nx" data-target="m3"><span class="pl">Next</span><span class="pt">Module 03 · Docker →</span></a></div>
+</section>
+
+<section class="view" id="m3">
+  <div class="eyebrow">Module 03 · Build &amp; Ship</div>
+  <h1 class="title">Docker &amp; Containers</h1>
+  <p class="lede">"It works on my machine" is the most expensive sentence in software. Containers kill it by packaging your app <em>and</em> its entire environment into one portable, immutable unit that runs identically on a laptop, a CI runner, and a production cluster.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ml">Level</span><span class="mv">Beginner → Intermediate</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">20–26 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 1–2</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Explain why containers exist and how they differ from virtual machines</li>
+    <li>Describe the Docker architecture: client, daemon, images, containers, registry</li>
+    <li>Understand image layers, the build cache, volumes and networks</li>
+    <li>Write efficient multi-stage Dockerfiles and slash image size</li>
+    <li>Orchestrate multi-container apps with Docker Compose</li>
+    <li>Apply container security: non-root users, image scanning, minimal base images</li>
+  </ul>
+
+  <h2><span class="h2num">02</span>Containers vs Virtual Machines — the key idea</h2>
+  <p>A <strong>VM</strong> virtualizes hardware: each one carries a full guest operating system, so it's heavy (gigabytes) and slow to boot (minutes). A <strong>container</strong> virtualizes the operating system: containers share the host kernel and isolate only the application's processes and files using Linux <em>namespaces</em> (isolation) and <em>cgroups</em> (resource limits). The result is megabytes, not gigabytes, and millisecond startup.</p>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TB
+  subgraph VM["VIRTUAL MACHINES — heavy"]
+    direction TB
+    H1["Host OS + Hypervisor"]:::base
+    G1["Guest OS"]:::vm --> A1["App A"]:::app
+    G2["Guest OS"]:::vm --> A2["App B"]:::app
+    H1 --> G1 & G2
+  end
+  subgraph CT["CONTAINERS — lightweight"]
+    direction TB
+    H2["Host OS + Container Runtime"]:::base
+    H2 --> C1["bins/libs → App A"]:::app
+    H2 --> C2["bins/libs → App B"]:::app
+    H2 --> C3["bins/libs → App C"]:::app
+  end
+  classDef base fill:#0F1A2B,stroke:#2B57F0,color:#cdd9f0;
+  classDef vm fill:#FBEFD7,stroke:#D9870C,color:#7a4a06;
+  classDef app fill:#EAF0FF,stroke:#2B57F0,color:#1B3CC0;
+    </pre>
+    <div class="diagram__cap">Fig 3.1 — One shared kernel lets containers pack far denser than VMs. This is why a server runs ~10× more containers than VMs.</div>
+  </div>
+
+  <h2><span class="h2num">03</span>Core concepts</h2>
+  <div class="concept"><span class="tag">Concept 01</span><h3>Image vs container</h3><p>An <strong>image</strong> is a read-only template (a class). A <strong>container</strong> is a running instance of that image (an object). Images are built once and run anywhere; you can spawn a hundred identical containers from one image.</p></div>
+  <div class="concept"><span class="tag">Concept 02</span><h3>Layers &amp; the build cache</h3><p>An image is a stack of read-only <strong>layers</strong>, one per Dockerfile instruction. Layers are cached and shared between images. The practical consequence: <strong>order your Dockerfile from least- to most-frequently-changing</strong>. Copy <code>package.json</code> and install dependencies <em>before</em> copying your source, so a code change doesn't bust the dependency cache.</p></div>
+  <div class="concept"><span class="tag">Concept 03</span><h3>Volumes &amp; networks</h3><p>Containers are ephemeral — when one dies its writable layer is gone. <strong>Volumes</strong> persist data outside the container lifecycle (databases, uploads). <strong>Networks</strong> let containers talk to each other by name on an isolated virtual network instead of by brittle IP.</p></div>
+
+  <h2><span class="h2num">04</span>Multi-stage builds — the production technique</h2>
+  <p>Your build tools (compilers, dev dependencies) should never ship to production. Multi-stage builds use one stage to build and a second, tiny stage to run — carrying only the final artifact across. This routinely cuts an image from 1.2 GB to under 50 MB.</p>
+  <pre class="code"><span class="cm"># ---- Stage 1: build ----</span>
+<span class="kw">FROM</span> node:20 <span class="kw">AS</span> build
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci                 <span class="cm"># cached unless deps change</span>
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> npm run build
+
+<span class="cm"># ---- Stage 2: runtime (tiny) ----</span>
+<span class="kw">FROM</span> nginx:alpine
+<span class="kw">COPY</span> --from=build /app/dist /usr/share/nginx/html
+<span class="kw">USER</span> nginx                 <span class="cm"># never run as root</span>
+<span class="kw">EXPOSE</span> 8080
+<span class="kw">HEALTHCHECK</span> CMD wget -qO- localhost:8080 || exit 1</pre>
+
+  <h2><span class="h2num">05</span>Hands-on labs</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge">LAB 3.1</span><span class="lab__t">Build, run, inspect, optimize</span><span class="lab__time">~45 min</span></div>
+    <div class="lab__b">
+      <div class="term"><div class="term__bar"><i></i><i></i><i></i><span class="term__name">docker</span></div><pre class="term__body"><span class="pr">$</span> docker build -t myapp:1.0 .
+<span class="pr">$</span> docker run -d -p 8080:8080 --name web myapp:1.0
+<span class="cm"># what's actually inside? layers + size</span>
+<span class="pr">$</span> docker history myapp:1.0
+<span class="pr">$</span> docker images myapp        <span class="cm"># compare size before/after multi-stage</span>
+<span class="cm"># exec into a running container to debug</span>
+<span class="pr">$</span> docker exec -it web sh
+<span class="cm"># view logs + resource usage live</span>
+<span class="pr">$</span> docker logs -f web ; docker stats web</pre></div>
+    </div>
+  </div>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Multi-container app with Compose</span><span class="lab__time">~4–5 h</span></div>
+    <div class="lab__b">
+      <p>Containerize a real 3-tier app — a React frontend, a backend API (pick Node, Python, Java or Go), and a Postgres database — and wire them together with Docker Compose. This is the canonical "containerize everything" exercise and directly prepares you for Kubernetes.</p>
+      <pre class="code"><span class="cm"># docker-compose.yml</span>
+<span class="key">services</span>:
+  <span class="key">web</span>:
+    <span class="key">build</span>: ./frontend
+    <span class="key">ports</span>: [<span class="st">"3000:80"</span>]
+    <span class="key">depends_on</span>: [api]
+  <span class="key">api</span>:
+    <span class="key">build</span>: ./backend
+    <span class="key">environment</span>:
+      <span class="key">DATABASE_URL</span>: postgres://app:secret@db:5432/app
+    <span class="key">depends_on</span>: [db]
+  <span class="key">db</span>:
+    <span class="key">image</span>: postgres:16-alpine
+    <span class="key">volumes</span>: [<span class="st">"pgdata:/var/lib/postgresql/data"</span>]
+    <span class="key">environment</span>:
+      <span class="key">POSTGRES_PASSWORD</span>: secret
+<span class="key">volumes</span>:
+  <span class="key">pgdata</span>:</pre>
+      <p class="muted" style="font-size:14px"><strong>Then run:</strong> <code>docker compose up --build</code>. Containerize the same backend in two languages and compare image sizes (Go vs Java is dramatic).</p>
+    </div>
+  </div>
+
+  <h2><span class="h2num">06</span>Mistakes, security &amp; best practices</h2>
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Anti-patterns</span><p><strong>Running as root</strong> inside the container · <strong>using <code>:latest</code></strong> (non-reproducible builds) · <strong>baking secrets into images</strong> (they're extractable from layers) · <strong>giant base images</strong> (use <code>alpine</code>/<code>distroless</code>) · <strong>one process becomes a "fat" container running everything</strong> — one concern per container.</p></div></div>
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Production habits</span><p>Pin versions. Use multi-stage + minimal/distroless bases. Add a <code>USER</code> and a <code>HEALTHCHECK</code>. Scan every image with <code>trivy</code> or <code>docker scout</code> in CI. Use <code>.dockerignore</code>. Consider <strong>rootless Docker</strong> for defense in depth.</p></div></div>
+
+  <h2><span class="h2num">07</span>Enterprise example</h2>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">How Spotify &amp; Shopify use it</span><p>Spotify packages hundreds of microservices as containers so any team can deploy independently without coordinating environments. Shopify runs one of the largest containerized Rails fleets in the world — containers let them scale predictably for Black Friday traffic spikes by simply launching more identical units.</p></div></div>
+
+  <h2><span class="h2num">08</span>Certification &amp; interview</h2>
+  <div class="badges"><span class="badge b-green">Docker Certified Associate (DCA)</span><span class="badge b-brand">Foundation for CKAD</span></div>
+  <details class="acc"><summary><span class="q">Q1</span>How do you reduce a Docker image's size?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>Multi-stage builds (ship only the artifact); a minimal base (<code>alpine</code>/<code>distroless</code>); combine <code>RUN</code> commands and clean package caches in the same layer; use <code>.dockerignore</code>; remove build-time dependencies. Verify with <code>docker history</code> and <code>dive</code>.</p></div></details>
+  <details class="acc"><summary><span class="q">Q2</span>Container exits immediately on start. How do you debug it?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>Check <code>docker logs &lt;id&gt;</code> for the crash, and the exit code via <code>docker inspect</code>. A container lives only as long as its main process (PID 1) — if the command finishes or errors, it exits. Common causes: wrong <code>CMD</code>, a foreground process that backgrounds itself, or a missing file. Override the entrypoint to get a shell: <code>docker run -it --entrypoint sh &lt;image&gt;</code>.</p></div></details>
+
+  <h2><span class="h2num">09</span>Free resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Docker Official Documentation</b><span>docs.docker.com</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9l3 2-3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="res__m"><b>Play with Docker</b><span>labs.play-with-docker.com · free in-browser</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="res__m"><b>Trivy &amp; Dive</b><span>aquasecurity/trivy · wagoodman/dive — scan &amp; inspect</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m2"><span class="pl">Prev</span><span class="pt">← Module 02 · Git</span></a><a class="nx" data-target="m4"><span class="pl">Next</span><span class="pt">Module 04 · Kubernetes →</span></a></div>
+</section>
+
+<section class="view" id="m4">
+  <div class="eyebrow">Module 04 · Build &amp; Ship</div>
+  <h1 class="title">Kubernetes</h1>
+  <p class="lede">One container is easy. A thousand containers across fifty machines — self-healing, auto-scaling, rolling out new versions with zero downtime — is the hard problem Kubernetes was built to solve. This is the largest and most career-defining module in the course.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Intermediate → Advanced</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">35–45 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Module 3</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Explain the control-plane / worker-node architecture and what each component does</li>
+    <li>Work fluently with Pods, ReplicaSets, Deployments, StatefulSets, DaemonSets</li>
+    <li>Expose apps with Services, Ingress, and understand cluster DNS &amp; service discovery</li>
+    <li>Manage configuration &amp; secrets with ConfigMaps and Secrets</li>
+    <li>Handle storage with Persistent Volumes, PVCs and Storage Classes</li>
+    <li>Secure access with RBAC and isolate workloads with Namespaces</li>
+    <li>Package apps with Helm; autoscale and run highly-available, multi-region clusters</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The core idea: declarative reconciliation</span><p>You don't tell Kubernetes <em>how</em> to do things step by step. You declare the <strong>desired state</strong> ("I want 5 replicas of this image") and a control loop continuously compares desired vs actual state and fixes any drift. A node dies? It reschedules the Pods. A container crashes? It restarts it. This single loop is the source of Kubernetes' self-healing superpower — and of its complexity.</p></div></div>
+
+  <h2><span class="h2num">02</span>Architecture</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TB
+  subgraph CP["CONTROL PLANE — the brain"]
+    API["kube-apiserver<br/>front door, all traffic"]:::api
+    ETCD[("etcd<br/>cluster state DB")]:::etcd
+    SCH["scheduler<br/>places Pods on nodes"]:::cp
+    CM["controller-manager<br/>runs reconcile loops"]:::cp
+    API <--> ETCD
+    SCH --> API
+    CM --> API
+  end
+  subgraph N1["WORKER NODE 1"]
+    K1["kubelet"]:::node --> P1["Pod"]:::pod
+    KP1["kube-proxy"]:::node
+  end
+  subgraph N2["WORKER NODE 2"]
+    K2["kubelet"]:::node --> P2["Pod"]:::pod
+    KP2["kube-proxy"]:::node
+  end
+  API -->|"desired state"| K1 & K2
+  DEV(["You: kubectl apply"]):::dev --> API
+  classDef api fill:#2B57F0,stroke:#1B3CC0,color:#fff;
+  classDef etcd fill:#FBEFD7,stroke:#D9870C,color:#7a4a06;
+  classDef cp fill:#EFE8FC,stroke:#7444D9,color:#3d2c63;
+  classDef node fill:#DEF3F1,stroke:#0C9488,color:#0a5048;
+  classDef pod fill:#EAF0FF,stroke:#2B57F0,color:#1B3CC0;
+  classDef dev fill:#0F1A2B,stroke:#2B57F0,color:#cdd9f0;
+    </pre>
+    <div class="diagram__cap">Fig 4.1 — The control plane decides; nodes execute. Everything goes through the API server, and etcd is the single source of truth.</div>
+  </div>
+  <table class="tbl">
+    <tr><th>Component</th><th>Job (plain English)</th></tr>
+    <tr><td><strong>kube-apiserver</strong></td><td>The only front door. Every command and component talks through it. Validates and persists changes.</td></tr>
+    <tr><td><strong>etcd</strong></td><td>The cluster's memory — a key-value database holding the entire desired &amp; actual state. Lose it and you lose the cluster.</td></tr>
+    <tr><td><strong>scheduler</strong></td><td>Decides which node a new Pod should run on, based on resources, affinity and constraints.</td></tr>
+    <tr><td><strong>controller-manager</strong></td><td>Runs the reconcile loops that make reality match desired state.</td></tr>
+    <tr><td><strong>kubelet</strong></td><td>The agent on each node. Starts containers and reports health back to the API server.</td></tr>
+    <tr><td><strong>kube-proxy</strong></td><td>Programs network rules so Services route traffic to the right Pods.</td></tr>
+  </table>
+
+  <h2><span class="h2num">03</span>The workload objects</h2>
+  <div class="grid g2">
+    <div class="card"><h4>Pod</h4><p class="muted" style="font-size:14px">Smallest unit — one or more tightly-coupled containers sharing network &amp; storage. You rarely create these directly.</p></div>
+    <div class="card"><h4>Deployment</h4><p class="muted" style="font-size:14px">Manages stateless apps: declares replicas, handles rolling updates &amp; rollbacks. Your default workload object.</p></div>
+    <div class="card"><h4>StatefulSet</h4><p class="muted" style="font-size:14px">For stateful apps (databases) needing stable identity, ordered startup, and per-Pod persistent storage.</p></div>
+    <div class="card"><h4>DaemonSet</h4><p class="muted" style="font-size:14px">Runs one Pod on every node — perfect for log collectors, monitoring agents, and CNI plugins.</p></div>
+  </div>
+
+  <h2><span class="h2num">04</span>A first Deployment + Service</h2>
+  <pre class="code"><span class="cm"># deployment.yaml — declarative desired state</span>
+<span class="key">apiVersion</span>: apps/v1
+<span class="key">kind</span>: Deployment
+<span class="key">metadata</span>: {<span class="key">name</span>: web}
+<span class="key">spec</span>:
+  <span class="key">replicas</span>: <span class="nu">3</span>
+  <span class="key">selector</span>: {<span class="key">matchLabels</span>: {<span class="key">app</span>: web}}
+  <span class="key">template</span>:
+    <span class="key">metadata</span>: {<span class="key">labels</span>: {<span class="key">app</span>: web}}
+    <span class="key">spec</span>:
+      <span class="key">containers</span>:
+        - <span class="key">name</span>: web
+          <span class="key">image</span>: myapp:1.0
+          <span class="key">ports</span>: [{<span class="key">containerPort</span>: <span class="nu">8080</span>}]
+          <span class="key">resources</span>:                 <span class="cm"># ALWAYS set these</span>
+            <span class="key">requests</span>: {<span class="key">cpu</span>: 100m, <span class="key">memory</span>: 128Mi}
+            <span class="key">limits</span>:   {<span class="key">cpu</span>: 500m, <span class="key">memory</span>: 256Mi}
+          <span class="key">readinessProbe</span>:            <span class="cm"># don't send traffic until ready</span>
+            <span class="key">httpGet</span>: {<span class="key">path</span>: /healthz, <span class="key">port</span>: <span class="nu">8080</span>}</pre>
+
+  <h2><span class="h2num">05</span>Hands-on labs</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge">LAB 4.1</span><span class="lab__t">Deploy, scale, self-heal, roll back</span><span class="lab__time">~60 min</span></div>
+    <div class="lab__b">
+      <p>Use a free local cluster — <a href="https://kind.sigs.k8s.io">kind</a>, minikube, or k3d:</p>
+      <div class="term"><div class="term__bar"><i></i><i></i><i></i><span class="term__name">kubectl</span></div><pre class="term__body"><span class="pr">$</span> kubectl apply -f deployment.yaml
+<span class="pr">$</span> kubectl get pods -o wide          <span class="cm"># 3 pods across nodes</span>
+<span class="cm"># watch self-healing: delete a pod, it comes back</span>
+<span class="pr">$</span> kubectl delete pod -l app=web --field-selector ...; kubectl get pods -w
+<span class="cm"># scale by changing desired state</span>
+<span class="pr">$</span> kubectl scale deploy/web --replicas=10
+<span class="cm"># zero-downtime rollout + rollback</span>
+<span class="pr">$</span> kubectl set image deploy/web web=myapp:2.0
+<span class="pr">$</span> kubectl rollout status deploy/web
+<span class="pr">$</span> kubectl rollout undo deploy/web    <span class="cm"># instant revert</span></pre></div>
+    </div>
+  </div>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Production-ready microservices on Kubernetes</span><span class="lab__time">~8–10 h</span></div>
+    <div class="lab__b">
+      <p>Take your Compose app from Module 3 and run it properly on Kubernetes: Deployments for stateless services, a StatefulSet for Postgres with a PVC, a ConfigMap + Secret for configuration, a Service for internal discovery, and an Ingress for external traffic. Then add a HorizontalPodAutoscaler and package the whole thing as a Helm chart.</p>
+      <ul class="clean"><li>Namespace-isolate the app; apply RBAC so the deploy account has least privilege</li><li>Add liveness + readiness probes to every workload</li><li>Configure an HPA targeting 70% CPU; load-test it and watch Pods scale</li><li>Convert raw YAML into a parameterized Helm chart with <code>values.yaml</code></li><li>(Stretch) Deploy to a managed cluster (EKS/GKE/AKS) and add a second region</li></ul>
+    </div>
+  </div>
+
+  <h2><span class="h2num">06</span>Mistakes, security &amp; best practices</h2>
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Anti-patterns</span><p><strong>No resource requests/limits</strong> (one Pod starves the node) · <strong>no health probes</strong> (traffic hits dead Pods) · <strong>Secrets as plain ConfigMaps</strong> · <strong>cluster-admin for everything</strong> · <strong>treating Pods as pets</strong> (they're cattle — designed to die) · <strong>running databases in plain Deployments</strong> without persistent storage.</p></div></div>
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Production habits</span><p>Set requests/limits and probes on everything. Use namespaces + RBAC + NetworkPolicies. Externalize config. Use Helm/Kustomize for repeatability. Enable Pod Security Standards. Spread replicas across nodes/zones with topology constraints for HA.</p></div></div>
+
+  <h2><span class="h2num">07</span>When NOT to use Kubernetes</h2>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Architect's caution</span><p>Kubernetes is a heavy hammer. For a simple website, a single API, or an early-stage startup, it is often <strong>over-engineering</strong> — a managed PaaS (Cloud Run, App Runner, Fly.io) or plain serverless will be cheaper, simpler and faster to ship. Adopt Kubernetes when you have many services, need fine-grained control, or genuinely operate at scale. The complexity tax is real; pay it deliberately.</p></div></div>
+
+  <h2><span class="h2num">08</span>Enterprise example</h2>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">How the giants run it</span><p>Kubernetes itself descends from Google's internal Borg. Airbnb, Spotify and Pinterest run thousands of services on it to give teams self-service deployment. The pattern is consistent: a central platform team operates the clusters; product teams ship to them through paved-road tooling — exactly the Engineer/Architect split from the intro.</p></div></div>
+
+  <h2><span class="h2num">09</span>Certification &amp; interview</h2>
+  <div class="badges"><span class="badge b-green">CKA — Administrator</span><span class="badge b-green">CKAD — Developer</span><span class="badge b-green">CKS — Security</span><span class="badge b-amber">KCNA — entry</span></div>
+  <details class="acc"><summary><span class="q">Q1</span>A Pod is stuck in <code>Pending</code>. What's wrong?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p><code>Pending</code> means the scheduler can't place it. Run <code>kubectl describe pod</code> and read Events. Usual causes: insufficient CPU/memory on any node, a node selector/affinity/taint that nothing satisfies, or an unbound PVC (no matching PV/StorageClass). Fix the constraint or add capacity.</p></div></details>
+  <details class="acc"><summary><span class="q">Q2</span>Explain the difference between a Deployment and a StatefulSet.<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>A Deployment manages interchangeable, stateless Pods with random names and no ordering. A StatefulSet gives each Pod a stable, ordinal identity (<code>db-0</code>, <code>db-1</code>), ordered rolling updates, and its own persistent volume that survives rescheduling. Use Deployments for web/API tiers, StatefulSets for databases, Kafka, and anything that needs stable identity or storage.</p></div></details>
+  <details class="acc"><summary><span class="q">Q3</span>How does a request reach a Pod from outside the cluster?<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary><div class="acc__body"><p>External DNS → cloud load balancer → Ingress controller (e.g. NGINX) which routes by host/path → a Service (stable virtual IP) → kube-proxy load-balances to a healthy Pod selected by labels. Cluster DNS (CoreDNS) resolves Service names internally so services find each other by name, not IP.</p></div></details>
+
+  <h2><span class="h2num">10</span>Free resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Kubernetes Official Docs + Tutorials</b><span>kubernetes.io/docs</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9l3 2-3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="res__m"><b>Killercoda Kubernetes scenarios + CKA/CKAD labs</b><span>killercoda.com</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="res__m"><b>kind / minikube / k3d</b><span>kubernetes.io · free local clusters</span></div><span class="res__tag">OSS</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div class="res__m"><b>Kubernetes the Hard Way (Kelsey Hightower)</b><span>github.com/kelseyhightower · build it from scratch</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m3"><span class="pl">Prev</span><span class="pt">← Module 03 · Docker</span></a><a class="nx" data-target="m5"><span class="pl">Next</span><span class="pt">Module 05 · CI/CD →</span></a></div>
+</section>
+
+<section class="view" id="m5">
+  <div class="eyebrow">Module 05 · Build &amp; Ship</div>
+  <h1 class="title">CI/CD — Continuous Integration &amp; Delivery</h1>
+  <p class="lede">This is the conveyor belt of the whole pipeline. CI/CD turns "a human runs some commands and prays" into "every commit is automatically built, tested, scanned and shipped." It is the difference between deploying quarterly and deploying a hundred times a day.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Intermediate</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">22–28 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 2–3</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Distinguish Continuous Integration, Delivery and Deployment</li>
+    <li>Design a multi-stage pipeline: build → test → scan → package → deploy</li>
+    <li>Manage secrets, artifacts and caching in pipelines</li>
+    <li>Implement safe deployment strategies: rolling, blue-green, canary, feature flags, shadow</li>
+    <li>Build real pipelines in GitHub Actions (and read Jenkins/GitLab CI)</li>
+    <li>Add automated rollbacks and notifications</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Why it exists</span><p><strong>CI</strong> = every commit is merged and tested continuously, so integration bugs surface in minutes, not at a painful end-of-quarter "merge week." <strong>CD</strong> = the tested artifact is automatically pushed toward production. Smaller, more frequent releases are <em>less</em> risky, not more — a tiny change is easy to reason about and trivial to roll back.</p></div></div>
+
+  <h2><span class="h2num">02</span>Anatomy of a pipeline</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  C(["git push"]):::g --> B["Build<br/>compile + image"]:::s
+  B --> T["Test<br/>unit + integration"]:::s
+  T --> Q["Scan<br/>SAST + image CVEs"]:::s
+  Q --> A["Package<br/>push to registry"]:::s
+  A --> ST["Deploy → Staging"]:::d
+  ST --> G{"Gate:<br/>approve?"}:::gate
+  G -->|yes| PR["Deploy → Prod<br/>(canary → full)"]:::p
+  G -->|no| X["Rollback / fix"]:::x
+  classDef g fill:#0F1A2B,stroke:#2B57F0,color:#cdd9f0;
+  classDef s fill:#EAF0FF,stroke:#2B57F0,color:#1B3CC0;
+  classDef d fill:#DEF3F1,stroke:#0C9488,color:#0a5048;
+  classDef p fill:#E1F4EB,stroke:#0E9C66,color:#0a5c3c;
+  classDef gate fill:#FBEFD7,stroke:#D9870C,color:#7a4a06;
+  classDef x fill:#FBEAE8,stroke:#DB433A,color:#8c241d;
+    </pre>
+    <div class="diagram__cap">Fig 5.1 — A commit flows through automated quality gates; only approved, scanned artifacts reach production.</div>
+  </div>
+
+  <h2><span class="h2num">03</span>Deployment strategies — the decision table</h2>
+  <table class="tbl">
+    <tr><th>Strategy</th><th>How it works</th><th>Use when</th></tr>
+    <tr><td><strong>Rolling</strong></td><td>Replace instances gradually, a few at a time</td><td>Default; stateless apps, backward-compatible changes</td></tr>
+    <tr><td><strong>Blue-Green</strong></td><td>Two identical envs; flip traffic instantly; keep old as instant rollback</td><td>Zero-downtime + fast rollback needed; can afford 2× infra briefly</td></tr>
+    <tr><td><strong>Canary</strong></td><td>Send 1–5% of traffic to the new version, watch metrics, then ramp</td><td>High-risk changes; you have good observability to judge health</td></tr>
+    <tr><td><strong>Feature flags</strong></td><td>Ship code dark, toggle features per-user at runtime</td><td>Decouple deploy from release; A/B tests; gradual rollout</td></tr>
+    <tr><td><strong>Shadow</strong></td><td>Mirror real traffic to the new version without serving its responses</td><td>Validate performance/correctness with zero user risk</td></tr>
+  </table>
+
+  <h2><span class="h2num">04</span>Hands-on project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Full production pipeline in GitHub Actions</span><span class="lab__time">~6–8 h</span></div>
+    <div class="lab__b">
+      <p>Build a complete pipeline that triggers on push: runs tests, builds &amp; scans a Docker image, pushes it to a registry, and deploys to your Kubernetes cluster — with a manual approval gate before production.</p>
+      <pre class="code"><span class="cm"># .github/workflows/deploy.yml</span>
+<span class="key">on</span>: { <span class="key">push</span>: { <span class="key">branches</span>: [main] } }
+<span class="key">jobs</span>:
+  <span class="key">build-test-deploy</span>:
+    <span class="key">runs-on</span>: ubuntu-latest
+    <span class="key">steps</span>:
+      - <span class="key">uses</span>: actions/checkout@v4
+      - <span class="key">run</span>: npm ci && npm test           <span class="cm"># CI: fail fast on red tests</span>
+      - <span class="key">run</span>: docker build -t $REG/app:$&#123;&#123; github.sha &#125;&#125; .
+      - <span class="key">run</span>: trivy image --exit-code 1 $REG/app:$&#123;&#123; github.sha &#125;&#125;  <span class="cm"># block on CVEs</span>
+      - <span class="key">run</span>: docker push $REG/app:$&#123;&#123; github.sha &#125;&#125;
+      - <span class="key">run</span>: kubectl set image deploy/web web=$REG/app:$&#123;&#123; github.sha &#125;&#125;</pre>
+      <p class="muted" style="font-size:14px"><strong>Extend:</strong> add an <code>environment: production</code> with required reviewers (manual gate); add a Slack notification on success/failure; add an automatic rollback step if <code>rollout status</code> fails.</p>
+    </div>
+  </div>
+
+  <h2><span class="h2num">05</span>Tools &amp; when to pick them</h2>
+  <table class="tbl">
+    <tr><th>Tool</th><th>Sweet spot</th></tr>
+    <tr><td><strong>GitHub Actions</strong></td><td>Default for GitHub repos; huge marketplace; YAML, zero infra to run</td></tr>
+    <tr><td><strong>GitLab CI</strong></td><td>All-in-one DevOps platform; strong if you live in GitLab</td></tr>
+    <tr><td><strong>Jenkins</strong></td><td>Maximum flexibility &amp; plugins; self-hosted; legacy-heavy enterprises</td></tr>
+    <tr><td><strong>Argo CD</strong></td><td>GitOps for Kubernetes — Git is the source of truth, Argo reconciles the cluster</td></tr>
+  </table>
+
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Anti-patterns</span><p><strong>Secrets hardcoded in pipeline YAML</strong> (use the platform's secret store + OIDC) · <strong>flaky tests that everyone ignores</strong> · <strong>no rollback path</strong> · <strong>deploying straight to prod with no staging/canary</strong> · <strong>slow pipelines</strong> nobody waits for (cache dependencies, parallelize).</p></div></div>
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Best practices</span><p>Keep pipelines fast (&lt;10 min) and deterministic. Fail fast. Scan in-pipeline. Use OIDC for cloud auth instead of long-lived keys. Make every deploy reversible. Tag images by commit SHA, never <code>:latest</code>.</p></div></div>
+
+  <h2><span class="h2num">06</span>Certification &amp; resources</h2>
+  <div class="badges"><span class="badge b-green">GitHub Actions Certification</span><span class="badge b-amber">GitLab CI Specialist</span><span class="badge">Argo / GitOps</span></div>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>GitHub Actions Documentation</b><span>docs.github.com/actions</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Jenkins &amp; GitLab CI Handbooks</b><span>jenkins.io/doc · docs.gitlab.com/ci</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="res__m"><b>Argo CD Documentation</b><span>argo-cd.readthedocs.io — GitOps</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m4"><span class="pl">Prev</span><span class="pt">← Module 04 · Kubernetes</span></a><a class="nx" data-target="m6"><span class="pl">Next</span><span class="pt">Module 06 · IaC →</span></a></div>
+</section>
+
+<section class="view" id="m6">
+  <div class="eyebrow">Module 06 · Provision &amp; Observe</div>
+  <h1 class="title">Infrastructure as Code</h1>
+  <p class="lede">Clicking around a cloud console to build infrastructure is slow, unrepeatable, and undocumented. IaC defines your entire cloud — networks, servers, databases, permissions — in version-controlled code you can review, diff, and recreate identically in seconds.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Intermediate</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">20–24 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 2, 7</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Explain declarative IaC and why it beats manual/imperative provisioning</li>
+    <li>Write Terraform: providers, resources, variables, outputs, modules</li>
+    <li>Manage state safely — remote backends, locking, and why state is sacred</li>
+    <li>Structure reusable modules and multiple environments with workspaces</li>
+    <li>Compare Terraform vs CloudFormation vs Pulumi vs OpenTofu</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The problem it solves</span><p>Manually-built infrastructure suffers <strong>configuration drift</strong> — environments quietly diverge until "works in staging, breaks in prod." IaC makes infrastructure <strong>reproducible, reviewable and disposable</strong>: the same code builds dev, staging and prod identically, and a destroyed environment is one <code>apply</code> away from rebirth.</p></div></div>
+
+  <h2><span class="h2num">02</span>The Terraform workflow &amp; state</h2>
+  <p>Terraform's loop is <code>write → plan → apply</code>. <code>plan</code> shows you exactly what will change <em>before</em> it happens — the killer feature. The <strong>state file</strong> is Terraform's map of what it manages in the real world; it is the most sensitive artifact in the system.</p>
+  <pre class="code"><span class="cm"># main.tf — a tiny, real example</span>
+<span class="kw">terraform</span> {
+  <span class="key">backend</span> <span class="st">"s3"</span> { <span class="key">bucket</span> = <span class="st">"my-tfstate"</span>, <span class="key">key</span> = <span class="st">"prod/net"</span>, <span class="key">dynamodb_table</span> = <span class="st">"tf-lock"</span> }
+}
+<span class="kw">resource</span> <span class="st">"aws_instance"</span> <span class="st">"web"</span> {
+  <span class="key">ami</span>           = var.ami_id
+  <span class="key">instance_type</span> = <span class="st">"t3.micro"</span>
+  <span class="key">tags</span>          = { Name = <span class="st">"web-${var.env}"</span> }
+}
+<span class="kw">output</span> <span class="st">"public_ip"</span> { <span class="key">value</span> = aws_instance.web.public_ip }</pre>
+  <div class="call pit"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">State: the cardinal sins</span><p><strong>Never commit state to Git</strong> (it contains secrets) · <strong>never edit it by hand</strong> · <strong>always use a remote backend with locking</strong> (or two engineers' simultaneous applies corrupt it) · always run <code>plan</code> and read it before <code>apply</code>.</p></div></div>
+
+  <h2><span class="h2num">03</span>Tool comparison</h2>
+  <table class="tbl">
+    <tr><th>Tool</th><th>Language</th><th>Notes</th></tr>
+    <tr><td><strong>Terraform</strong></td><td>HCL (declarative)</td><td>Multi-cloud standard; huge provider ecosystem; license now BSL</td></tr>
+    <tr><td><strong>OpenTofu</strong></td><td>HCL</td><td>Open-source Terraform fork (Linux Foundation); drop-in compatible</td></tr>
+    <tr><td><strong>CloudFormation</strong></td><td>YAML/JSON</td><td>AWS-native, deeply integrated, but AWS-only</td></tr>
+    <tr><td><strong>Pulumi</strong></td><td>Python/TS/Go</td><td>Real programming languages; great for complex logic &amp; devs</td></tr>
+  </table>
+
+  <h2><span class="h2num">04</span>Project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Provision a complete cloud environment as code</span><span class="lab__time">~6 h</span></div>
+    <div class="lab__b">
+      <p>With Terraform (AWS free tier), build a VPC with public/private subnets, a security group, an EC2 instance (or an EKS cluster), and an S3 bucket — all as reusable modules with a remote state backend. Then create <code>dev</code> and <code>prod</code> with the same module and different variables. Destroy and rebuild to prove reproducibility.</p>
+      <ul class="clean"><li>Use a remote S3 + DynamoDB backend with locking</li><li>Parameterize everything via <code>variables.tf</code>; expose <code>outputs.tf</code></li><li>Refactor repeated resources into a <code>modules/</code> folder</li><li>Run <code>terraform plan</code> in CI on every PR (foreshadows policy-as-code in Module 9)</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Best practices</span><p>Remote, locked, encrypted state. Small composable modules. Plan-on-PR, apply-on-merge. Pin provider versions. Tag every resource (owner, env, cost-center). Never make manual console changes to IaC-managed resources.</p></div></div>
+
+  <h2><span class="h2num">05</span>Certification &amp; resources</h2>
+  <div class="badges"><span class="badge b-green">HashiCorp Terraform Associate</span></div>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Terraform Tutorials (HashiCorp Developer)</b><span>developer.hashicorp.com/terraform/tutorials</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="res__m"><b>OpenTofu</b><span>opentofu.org · open-source fork</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m5"><span class="pl">Prev</span><span class="pt">← Module 05 · CI/CD</span></a><a class="nx" data-target="m7"><span class="pl">Next</span><span class="pt">Module 07 · Cloud Platforms →</span></a></div>
+</section>
+
+<section class="view" id="m7">
+  <div class="eyebrow">Module 07 · Provision &amp; Observe</div>
+  <h1 class="title">Cloud Platforms — AWS · Azure · GCP</h1>
+  <p class="lede">The cloud is the rented factory everything runs in. You don't need to memorize all three providers — you need the mental model of cloud building blocks (compute, network, storage, identity) so you can map any service in any provider to a concept you already understand.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Intermediate</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">24–30 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 1, 6</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Map the core building blocks (compute, networking, storage, IAM, databases) across providers</li>
+    <li>Understand regions, availability zones, and the shared responsibility model</li>
+    <li>Stand up compute, a VPC/VNet, object storage and managed databases</li>
+    <li>Reason about cloud cost models and the basics of cost control</li>
+    <li>Deploy the same infrastructure to all three clouds and compare</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Why cloud</span><p>The cloud trades capital expense (buying servers) for operating expense (renting them by the second), with effectively infinite elasticity. You stop guessing capacity and start paying for exactly what you use — and you inherit global infrastructure no startup could build itself. The trade-off is cost-at-scale and lock-in, which is where the architect earns their salary.</p></div></div>
+
+  <h2><span class="h2num">02</span>The same concept, three names</h2>
+  <table class="tbl">
+    <tr><th>Concept</th><th>AWS</th><th>Azure</th><th>GCP</th></tr>
+    <tr><td>VMs</td><td>EC2</td><td>Virtual Machines</td><td>Compute Engine</td></tr>
+    <tr><td>Serverless functions</td><td>Lambda</td><td>Functions</td><td>Cloud Functions</td></tr>
+    <tr><td>Managed Kubernetes</td><td>EKS</td><td>AKS</td><td>GKE</td></tr>
+    <tr><td>Object storage</td><td>S3</td><td>Blob Storage</td><td>Cloud Storage</td></tr>
+    <tr><td>Virtual network</td><td>VPC</td><td>VNet</td><td>VPC</td></tr>
+    <tr><td>Managed SQL</td><td>RDS</td><td>SQL Database</td><td>Cloud SQL</td></tr>
+    <tr><td>Identity</td><td>IAM</td><td>Entra ID</td><td>Cloud IAM</td></tr>
+  </table>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Learn one deeply first</span><p>Pick <strong>AWS</strong> (largest market share, most jobs) or whichever your target employers use, learn it deeply, then the others become a translation exercise. Spreading thin across all three early just produces shallow knowledge of all of them.</p></div></div>
+
+  <h2><span class="h2num">03</span>Cost &amp; the shared responsibility model</h2>
+  <p>Two ideas the architect must internalize. <strong>Shared responsibility:</strong> the provider secures the cloud (hardware, hypervisor); <em>you</em> secure what's in it (your data, IAM, patching). <strong>Cost:</strong> compute is billed per-second, storage per-GB-month, and — the silent killer — <strong>egress (data leaving the cloud) is expensive</strong>. Architecture decisions are cost decisions.</p>
+
+  <h2><span class="h2num">04</span>Project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Deploy identical infra across AWS, Azure &amp; GCP</span><span class="lab__time">~8 h</span></div>
+    <div class="lab__b">
+      <p>Using Terraform with three providers, deploy the same simple stack (a VM + object storage bucket + firewall rule) to AWS, Azure and GCP. Document the differences in service names, defaults, and — eye-openingly — cost. Use only free-tier resources.</p>
+      <ul class="clean"><li>Reuse one Terraform module structure, swap providers</li><li>Note IAM/identity differences between the three</li><li>Tear everything down with <code>terraform destroy</code> to avoid charges</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Best practices</span><p>Always set a billing alert before you start. Use least-privilege IAM, never the root account for daily work. Tag resources for cost attribution. Deploy across multiple AZs for resilience. Prefer managed services unless you have a strong reason to self-host.</p></div></div>
+
+  <h2><span class="h2num">05</span>Certification &amp; resources</h2>
+  <div class="badges"><span class="badge b-green">AWS Cloud Practitioner → Solutions Architect</span><span class="badge b-green">Azure AZ-900 → AZ-104</span><span class="badge b-green">GCP Associate Cloud Engineer</span></div>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>AWS Skill Builder · Microsoft Learn · Google Cloud Skills Boost</b><span>free tiers + guided labs on all three</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21V8l9-5 9 5v13M3 21h18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="res__m"><b>AWS Well-Architected Framework</b><span>aws.amazon.com/architecture — free, essential reading</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m6"><span class="pl">Prev</span><span class="pt">← Module 06 · IaC</span></a><a class="nx" data-target="m8"><span class="pl">Next</span><span class="pt">Module 08 · Observability →</span></a></div>
+</section>
+
+<section class="view" id="m8">
+  <div class="eyebrow">Module 08 · Provision &amp; Observe</div>
+  <h1 class="title">Observability</h1>
+  <p class="lede">You cannot operate what you cannot see. When a distributed system misbehaves at 3 a.m., observability is the difference between a five-minute fix and a five-hour outage. This is the quality-control station of the pipeline.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Intermediate</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">16–20 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Module 4</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Distinguish the three pillars: metrics, logs, traces — and when to use each</li>
+    <li>Understand monitoring vs observability</li>
+    <li>Collect metrics with Prometheus and visualize with Grafana</li>
+    <li>Aggregate logs (Loki / ELK) and trace requests (OpenTelemetry / Jaeger)</li>
+    <li>Set meaningful alerts on symptoms, not noise</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Monitoring vs observability</span><p><strong>Monitoring</strong> answers known questions ("is CPU high?") with predefined dashboards. <strong>Observability</strong> lets you ask <em>new</em> questions about novel failures you never anticipated, by exploring rich telemetry. In a monolith, monitoring sufficed. In microservices, where a single request crosses dozens of services, you need observability to follow it.</p></div></div>
+
+  <h2><span class="h2num">02</span>The three pillars</h2>
+  <div class="grid g3">
+    <div class="card"><div class="kic" style="background:var(--brand-soft)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><h4>Metrics</h4><p class="muted" style="font-size:14px">Numbers over time (CPU, latency, error rate). Cheap to store, great for dashboards &amp; alerts. <em>Prometheus.</em></p></div>
+    <div class="card"><div class="kic" style="background:var(--teal-soft);color:var(--teal)"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><h4>Logs</h4><p class="muted" style="font-size:14px">Timestamped event records. Rich detail for the "why," but voluminous. <em>Loki / ELK.</em></p></div>
+    <div class="card"><div class="kic" style="background:var(--violet-soft);color:var(--violet)"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h4l2-7 2 14 2-7h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h4>Traces</h4><p class="muted" style="font-size:14px">The path of one request across all services, with timing per hop. Finds the slow link. <em>OpenTelemetry / Jaeger.</em></p></div>
+  </div>
+
+  <h2><span class="h2num">03</span>Project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Full observability stack on Kubernetes</span><span class="lab__time">~6 h</span></div>
+    <div class="lab__b">
+      <p>Instrument your Module 4 microservices app: deploy Prometheus to scrape metrics, Grafana for dashboards, Loki for logs, and OpenTelemetry + Jaeger for traces. Build a dashboard showing the "golden signals" (latency, traffic, errors, saturation) and wire one alert.</p>
+      <ul class="clean"><li>Use the <code>kube-prometheus-stack</code> Helm chart for a one-command setup</li><li>Add a RED dashboard (Rate, Errors, Duration) per service in Grafana</li><li>Trace a request end-to-end through Jaeger and find the slowest span</li><li>Define an alert: error rate &gt; 1% for 5 min → notification</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Best practices &amp; pitfalls</span><p>Alert on <strong>symptoms users feel</strong> (high latency, errors) not causes (high CPU). Avoid alert fatigue — every alert must be actionable. Use structured (JSON) logs. Adopt OpenTelemetry as the vendor-neutral standard so you're never locked in. Don't log secrets or PII.</p></div></div>
+
+  <h2><span class="h2num">04</span>Resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Prometheus + Grafana + OpenTelemetry docs</b><span>prometheus.io · grafana.com · opentelemetry.io</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="res__m"><b>kube-prometheus-stack (Helm)</b><span>github.com/prometheus-community</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m7"><span class="pl">Prev</span><span class="pt">← Module 07 · Cloud</span></a><a class="nx" data-target="m9"><span class="pl">Next</span><span class="pt">Module 09 · Security →</span></a></div>
+</section>
+
+<section class="view" id="m9">
+  <div class="eyebrow">Module 09 · Secure &amp; Design</div>
+  <h1 class="title">Security — DevSecOps</h1>
+  <p class="lede">Security bolted on at the end is security that fails. DevSecOps shifts security <em>left</em> — into every stage of the pipeline you've built — so vulnerabilities are caught at commit time, not by an attacker in production.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Advanced</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">20–26 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 5, 7</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Apply identity foundations: IAM, RBAC, OAuth, OIDC, SSO — and least privilege</li>
+    <li>Manage secrets properly with Vault and cloud secret managers</li>
+    <li>Embed scanning in CI: SAST, DAST, dependency &amp; container scanning</li>
+    <li>Enforce policy as code (OPA/Gatekeeper, Kyverno)</li>
+    <li>Secure the software supply chain: SBOMs, image signing (Sigstore/cosign), SLSA</li>
+  </ul>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Why shift left</span><p>A vulnerability fixed at coding time costs almost nothing; the same flaw exploited in production can cost millions and your reputation. "Shift left" means every gate you built in Module 5 also enforces security — scanning, signing, policy — so insecure code simply cannot reach production.</p></div></div>
+
+  <h2><span class="h2num">02</span>The DevSecOps toolchain by stage</h2>
+  <table class="tbl">
+    <tr><th>Pipeline stage</th><th>Security control</th><th>Example tools</th></tr>
+    <tr><td>Code</td><td>SAST, secret scanning</td><td>Semgrep, gitleaks, CodeQL</td></tr>
+    <tr><td>Dependencies</td><td>SCA (known-vuln dependencies)</td><td>Trivy, Snyk, Dependabot</td></tr>
+    <tr><td>Build</td><td>Image scan, SBOM, signing</td><td>Trivy, Syft, cosign</td></tr>
+    <tr><td>Deploy</td><td>Policy as code, admission control</td><td>OPA/Gatekeeper, Kyverno</td></tr>
+    <tr><td>Runtime</td><td>Secrets, RBAC, threat detection</td><td>Vault, Falco, NetworkPolicies</td></tr>
+  </table>
+
+  <h2><span class="h2num">03</span>Core concepts</h2>
+  <div class="concept"><span class="tag">Concept 01</span><h3>Least privilege &amp; zero trust</h3><p>Grant the minimum permissions needed, nothing more — every identity, service and pipeline. <strong>Zero trust</strong> assumes the network is already hostile: authenticate and authorize <em>every</em> request, never trust based on network location alone.</p></div>
+  <div class="concept"><span class="tag">Concept 02</span><h3>Supply chain security</h3><p>Modern apps are 80%+ third-party code. An <strong>SBOM</strong> (Software Bill of Materials) inventories every component so you can answer "are we affected by this new CVE?" in seconds. <strong>Signing</strong> (cosign) proves an image is the one you built and wasn't tampered with — the lesson of SolarWinds and Log4Shell.</p></div>
+
+  <h2><span class="h2num">04</span>Project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Secure your production pipeline end-to-end</span><span class="lab__time">~6 h</span></div>
+    <div class="lab__b">
+      <p>Harden the Module 5 pipeline: add secret scanning &amp; SAST on commit, dependency + container scanning that blocks on critical CVEs, generate and attach an SBOM, sign the image with cosign, and add an OPA/Kyverno policy that refuses to admit unsigned images or Pods running as root.</p>
+      <ul class="clean"><li>Move all secrets to Vault or a cloud secret manager + OIDC (no static keys)</li><li>Generate an SBOM with Syft; scan it with Trivy</li><li>Sign images with cosign; verify at admission</li><li>Write a Kyverno policy: deny <code>:latest</code>, deny privileged, require resource limits</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Best practices</span><p>Never store secrets in code or images — inject at runtime, rotate often, prefer short-lived credentials (OIDC). Scan everywhere. Sign artifacts. Enforce policy as code so security is automatic, not a review bottleneck. Patch fast; an SBOM makes it possible.</p></div></div>
+
+  <h2><span class="h2num">05</span>Certification &amp; resources</h2>
+  <div class="badges"><span class="badge b-green">CKS — Kubernetes Security</span><span class="badge b-amber">HashiCorp Vault Associate</span><span class="badge">OWASP fundamentals</span></div>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="res__m"><b>OWASP · OpenSSF · SLSA framework</b><span>owasp.org · openssf.org · slsa.dev</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="res__m"><b>Trivy · cosign/Sigstore · Vault tutorials</b><span>open-source supply-chain tooling</span></div><span class="res__tag">OSS</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m8"><span class="pl">Prev</span><span class="pt">← Module 08 · Observability</span></a><a class="nx" data-target="m10"><span class="pl">Next</span><span class="pt">Module 10 · Architecture →</span></a></div>
+</section>
+
+<section class="view" id="m10">
+  <div class="eyebrow">Module 10 · Secure &amp; Design</div>
+  <h1 class="title">Cloud Architecture</h1>
+  <p class="lede">This is where engineer becomes architect. You stop asking "how do I deploy this?" and start asking "what should we build, and why?" — designing systems that scale to millions, survive regional failures, and stay affordable.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Advanced → Architect</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">22–28 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 4, 7</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Design microservices &amp; event-driven systems — and know when a monolith is better</li>
+    <li>Apply service mesh (Istio/Linkerd), API gateways, CQRS and event sourcing appropriately</li>
+    <li>Architect for high availability, disaster recovery and multi-region</li>
+    <li>Use caching and async messaging to scale</li>
+    <li>Make and defend trade-offs across cost, reliability, latency and complexity</li>
+  </ul>
+
+  <h2><span class="h2num">02</span>Monolith vs microservices — the central trade-off</h2>
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The most over-corrected decision in tech</span><p>Microservices buy independent scaling and deployment — at the cost of enormous operational and distributed-systems complexity. Most systems should <strong>start as a well-structured monolith</strong> and extract services only where a real bottleneck or team-boundary justifies it. Premature microservices have sunk more startups than monoliths ever did. Amazon and Netflix went micro because they had thousands of engineers and planet-scale traffic — that is not your situation on day one.</p></div></div>
+
+  <h2><span class="h2num">03</span>An event-driven reference architecture</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  U(["Clients"]):::u --> GW["API Gateway<br/>auth · rate-limit · route"]:::gw
+  GW --> S1["Order svc"]:::svc
+  GW --> S2["User svc"]:::svc
+  S1 -->|publish event| Q[("Message broker<br/>Kafka / SQS")]:::q
+  Q --> S3["Inventory svc"]:::svc
+  Q --> S4["Email svc"]:::svc
+  S1 --> CA[("Cache<br/>Redis")]:::ca
+  S1 --> DB[("DB")]:::db
+  classDef u fill:#0F1A2B,stroke:#2B57F0,color:#cdd9f0;
+  classDef gw fill:#FBEFD7,stroke:#D9870C,color:#7a4a06;
+  classDef svc fill:#EAF0FF,stroke:#2B57F0,color:#1B3CC0;
+  classDef q fill:#EFE8FC,stroke:#7444D9,color:#3d2c63;
+  classDef ca fill:#FBEAE8,stroke:#DB433A,color:#8c241d;
+  classDef db fill:#DEF3F1,stroke:#0C9488,color:#0a5048;
+    </pre>
+    <div class="diagram__cap">Fig 10.1 — Async events decouple services: the order service doesn't wait on inventory or email, so a slow consumer can't take checkout down.</div>
+  </div>
+
+  <h2><span class="h2num">04</span>HA &amp; disaster recovery — the language of risk</h2>
+  <p>Architects speak in <strong>RTO</strong> (how fast you recover) and <strong>RPO</strong> (how much data you can lose). These dictate — and are dictated by — spend.</p>
+  <table class="tbl">
+    <tr><th>DR strategy</th><th>RTO / RPO</th><th>Cost</th></tr>
+    <tr><td>Backup &amp; restore</td><td>Hours / hours</td><td>$ — cheapest</td></tr>
+    <tr><td>Pilot light</td><td>~10s of min</td><td>$$</td></tr>
+    <tr><td>Warm standby</td><td>Minutes</td><td>$$$</td></tr>
+    <tr><td>Active-active multi-region</td><td>~Zero</td><td>$$$$ — most expensive</td></tr>
+  </table>
+
+  <h2><span class="h2num">05</span>Capstone-style project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Design a Netflix-scale architecture</span><span class="lab__time">~8 h</span></div>
+    <div class="lab__b">
+      <p>Produce an architecture document + diagram for a global video-streaming platform: ingestion, transcoding, a CDN strategy, recommendation service, multi-region active-active, autoscaling, caching layers, and a failure-mode analysis. Justify every choice in cost/reliability/latency terms, and explicitly state what you'd build differently with 10 engineers vs 1,000.</p>
+      <ul class="clean"><li>Diagram the request path for "user presses play"</li><li>Choose data stores per workload (the right tool, not one DB for everything)</li><li>Define SLOs and the DR strategy with explicit RTO/RPO</li><li>Write the one-page executive summary — the real architect deliverable</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Architect principles</span><p>Design for failure (everything fails eventually). Prefer loose coupling &amp; async. Cache aggressively but invalidate carefully. Don't distribute until you must. Every architecture is a set of trade-offs — your job is to make them <em>explicitly</em> and defend them, not to chase the newest pattern.</p></div></div>
+
+  <h2><span class="h2num">06</span>Resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>microservices.io (Chris Richardson) + Google SRE Books</b><span>microservices.io · sre.google/books — free online</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 21V8l9-5 9 5v13M3 21h18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="res__m"><b>AWS / Azure / GCP Well-Architected Frameworks + Istio docs</b><span>vendor architecture guidance, free</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m9"><span class="pl">Prev</span><span class="pt">← Module 09 · Security</span></a><a class="nx" data-target="m11"><span class="pl">Next</span><span class="pt">Module 11 · Enterprise Ops →</span></a></div>
+</section>
+
+<section class="view" id="m11">
+  <div class="eyebrow">Module 11 · Operate &amp; Capstone</div>
+  <h1 class="title">Enterprise Operations &amp; SRE</h1>
+  <p class="lede">Building a system is one thing; running it reliably and affordably for years is another. This module covers the disciplines that keep enterprise platforms alive: SRE, FinOps, governance, compliance and incident response.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Advanced → Architect</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">18–22 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">Modules 8, 10</span></div>
+  </div>
+
+  <h2><span class="h2num">01</span>Learning objectives</h2>
+  <ul class="clean check">
+    <li>Apply SRE: SLIs, SLOs, SLAs and error budgets</li>
+    <li>Run effective incident response &amp; blameless postmortems</li>
+    <li>Control cloud spend with FinOps practices</li>
+    <li>Establish governance &amp; compliance guardrails (SOC 2, ISO 27001, GDPR basics)</li>
+    <li>Design backup &amp; DR operations that are actually tested</li>
+  </ul>
+
+  <h2><span class="h2num">02</span>The vocabulary of reliability</h2>
+  <table class="tbl">
+    <tr><th>Term</th><th>Plain meaning</th></tr>
+    <tr><td><strong>SLI</strong></td><td>A measured signal of health, e.g. "% of requests under 200ms"</td></tr>
+    <tr><td><strong>SLO</strong></td><td>Your internal target for an SLI, e.g. "99.9% of requests under 200ms"</td></tr>
+    <tr><td><strong>SLA</strong></td><td>The contractual promise to customers (with penalties), looser than your SLO</td></tr>
+    <tr><td><strong>Error budget</strong></td><td>The allowed unreliability (100% − SLO). Spend it on shipping features; if exhausted, freeze and stabilize</td></tr>
+  </table>
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">The error-budget insight</span><p>100% reliability is the wrong target — it's infinitely expensive and slows innovation to zero. The error budget reframes reliability as a <em>resource</em>: it ends the eternal dev-vs-ops war by giving both sides the same number to optimize against. This idea, from Google's SRE practice, is the backbone of modern operations.</p></div></div>
+
+  <h2><span class="h2num">03</span>FinOps — engineering meets the bill</h2>
+  <p>Cloud spend is a shared, engineering-driven responsibility. FinOps brings visibility (tag &amp; attribute every dollar), optimization (right-size, autoscale, use spot/savings plans, kill idle resources), and accountability (teams see and own their costs).</p>
+
+  <h2><span class="h2num">04</span>Project</h2>
+  <div class="lab">
+    <div class="lab__h"><span class="lab__badge proj">PROJECT</span><span class="lab__t">Operate a simulated enterprise platform</span><span class="lab__time">~6 h</span></div>
+    <div class="lab__b">
+      <p>Take your full stack (cluster + pipeline + observability) and run it like an SRE for a week of simulated operations: define SLOs and error budgets, build an on-call alert that pages on SLO burn, run a chaos experiment (kill a node), and write a blameless postmortem. Add a cost dashboard and identify three savings.</p>
+      <ul class="clean"><li>Define 2–3 SLOs with error budgets and a burn-rate alert</li><li>Inject a failure (e.g. with a chaos tool); measure recovery; document RTO/RPO</li><li>Write a postmortem: timeline, root cause, action items — no blame</li><li>Produce a cost-attribution view and a right-sizing recommendation</li></ul>
+    </div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Operating principles</span><p>Make on-call humane (actionable alerts only). Postmortems are blameless — humans err, systems should be resilient. Test your backups by restoring them; an untested backup is a hope, not a plan. Treat cost as a first-class engineering metric. Automate toil away.</p></div></div>
+
+  <h2><span class="h2num">05</span>Resources</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Google SRE Book &amp; SRE Workbook</b><span>sre.google/books — free, the canonical texts</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div class="res__m"><b>FinOps Foundation Framework</b><span>finops.org — practices &amp; principles</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <div class="pnav"><a data-target="m10"><span class="pl">Prev</span><span class="pt">← Module 10 · Architecture</span></a><a class="nx" data-target="m12"><span class="pl">Next</span><span class="pt">Module 12 · Capstones →</span></a></div>
+</section>
+
+<section class="view" id="m12">
+  <div class="eyebrow">Module 12 · Operate &amp; Capstone</div>
+  <h1 class="title">Capstone Projects</h1>
+  <p class="lede">Everything converges here. These end-to-end builds are designed to become the centerpiece of your portfolio and your interview stories — each one exercises the entire pipeline from source to operated production.</p>
+
+  <div class="metastrip">
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Level</span><span class="mv">Capstone</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="ml">Est. time</span><span class="mv">40–60 h</span></div>
+    <div class="metachip"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ml">Prereq</span><span class="mv">All modules</span></div>
+  </div>
+
+  <div class="call why"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">How to use these</span><p>Pick <strong>one or two</strong> and take them all the way — a single deeply-finished project impresses far more than five half-built ones. Push everything to public GitHub repos with excellent READMEs and architecture diagrams. These repos <em>are</em> your résumé.</p></div></div>
+
+  <h2><span class="h2num">01</span>The capstone tracks</h2>
+  <p>Every capstone must include: containerization, a CI/CD pipeline, IaC-provisioned cloud infra, Kubernetes deployment, observability, security scanning, and a written architecture doc.</p>
+  <div class="grid g2">
+    <div class="card"><h4>🎬 Netflix-style streaming infra</h4><p class="muted" style="font-size:14px">Microservices, CDN strategy, transcoding pipeline, multi-region active-active, autoscaling.</p></div>
+    <div class="card"><h4>🛒 E-commerce platform</h4><p class="muted" style="font-size:14px">Event-driven orders/inventory/payments, Black-Friday autoscaling, blue-green deploys.</p></div>
+    <div class="card"><h4>🏦 Banking platform</h4><p class="muted" style="font-size:14px">High compliance, zero-trust security, audited pipelines, strict DR with tested RTO/RPO.</p></div>
+    <div class="card"><h4>🏥 Healthcare platform</h4><p class="muted" style="font-size:14px">PII/PHI handling, encryption everywhere, policy-as-code guardrails, access auditing.</p></div>
+    <div class="card"><h4>☁️ Multi-cloud SaaS</h4><p class="muted" style="font-size:14px">Provisioned across two clouds with Terraform, GitOps with Argo CD, per-tenant isolation.</p></div>
+    <div class="card"><h4>📊 Real-time analytics</h4><p class="muted" style="font-size:14px">Streaming ingestion (Kafka), stream processing, time-series storage, live dashboards.</p></div>
+    <div class="card"><h4>🤖 AI application deployment</h4><p class="muted" style="font-size:14px">Model serving on Kubernetes with GPU scheduling, autoscaling, canary model rollouts.</p></div>
+    <div class="card"><h4>🚀 Zero-downtime GitOps platform</h4><p class="muted" style="font-size:14px">Full GitOps with Argo CD, progressive delivery, automated rollback, drift detection.</p></div>
+  </div>
+
+  <h2><span class="h2num">02</span>Definition of "done"</h2>
+  <ul class="clean check">
+    <li>One command (or one <code>git push</code>) takes it from code to running in the cloud</li>
+    <li>Infrastructure is 100% codified — destroy and rebuild works</li>
+    <li>The pipeline blocks insecure or failing changes automatically</li>
+    <li>Dashboards show the golden signals; at least one meaningful alert fires correctly</li>
+    <li>A clear README + architecture diagram explains every decision and trade-off</li>
+    <li>You can whiteboard the whole system and defend it in an interview</li>
+  </ul>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">You've reached the end of the pipeline</span><p>If you can build, ship, secure, observe and operate one of these — and explain why every piece is there — you are no longer learning DevOps and cloud architecture. You're doing it. Now go ship the artifact: you.</p></div></div>
+
+  <div class="pnav"><a data-target="m11"><span class="pl">Prev</span><span class="pt">← Module 11 · Enterprise Ops</span></a><a class="nx" data-target="certs"><span class="pl">Next</span><span class="pt">Certification Roadmap →</span></a></div>
+</section>
+
+<section class="view" id="certs">
+  <div class="eyebrow">Career</div>
+  <h1 class="title">Certification Roadmap</h1>
+  <p class="lede">Certifications are a forcing function for breadth and a filter many employers screen on. Sequence them with the modules — don't chase a cert before you've done the hands-on work behind it. <span class="muted">Exam codes, pricing and availability change; always confirm on the official provider site.</span></p>
+
+  <h2><span class="h2num">01</span>Suggested sequence</h2>
+  <table class="tbl">
+    <tr><th>Order</th><th>Certification</th><th>After module(s)</th><th>Why</th></tr>
+    <tr><td>1</td><td><strong>AWS Cloud Practitioner</strong> (or AZ-900 / GCP CDL)</td><td>7</td><td>Cheap, broad cloud vocabulary; good confidence win</td></tr>
+    <tr><td>2</td><td><strong>HashiCorp Terraform Associate</strong></td><td>6</td><td>High ROI; IaC is in demand everywhere</td></tr>
+    <tr><td>3</td><td><strong>CKAD</strong> (Certified Kubernetes App Developer)</td><td>4–5</td><td>Hands-on Kubernetes from a developer's angle</td></tr>
+    <tr><td>4</td><td><strong>CKA</strong> (Certified Kubernetes Administrator)</td><td>4, 8</td><td>The flagship K8s cert; strong signal for ops roles</td></tr>
+    <tr><td>5</td><td><strong>AWS Solutions Architect Associate</strong> (or AZ-104 / GCP ACE)</td><td>7, 10</td><td>The cloud cert most recruiters look for</td></tr>
+    <tr><td>6</td><td><strong>CKS</strong> (Certified Kubernetes Security)</td><td>9</td><td>Advanced; requires a valid CKA first</td></tr>
+    <tr><td>7</td><td><strong>AWS/Azure/GCP DevOps Professional</strong></td><td>5, 11</td><td>Capstone-level; ties the whole pipeline together</td></tr>
+  </table>
+
+  <h2><span class="h2num">02</span>By domain</h2>
+  <div class="grid g2">
+    <div class="card"><h4>Foundations</h4><div class="badges" style="margin-top:8px"><span class="badge b-green">LFCS</span><span class="badge b-green">CompTIA Linux+</span><span class="badge b-green">GitHub Foundations</span></div></div>
+    <div class="card"><h4>Containers &amp; Kubernetes</h4><div class="badges" style="margin-top:8px"><span class="badge b-green">KCNA</span><span class="badge b-green">CKAD</span><span class="badge b-green">CKA</span><span class="badge b-green">CKS</span></div></div>
+    <div class="card"><h4>IaC &amp; CI/CD</h4><div class="badges" style="margin-top:8px"><span class="badge b-green">Terraform Associate</span><span class="badge b-green">GitHub Actions</span></div></div>
+    <div class="card"><h4>Cloud platforms</h4><div class="badges" style="margin-top:8px"><span class="badge b-green">AWS SAA / DevOps Pro</span><span class="badge b-green">Azure AZ-104 / AZ-400</span><span class="badge b-green">GCP ACE / DevOps Engineer</span></div></div>
+  </div>
+
+  <div class="call note"><svg class="ci" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 16v-5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div class="cb"><span class="ct">Honest advice</span><p>A portfolio of real, deployed projects (your capstones) beats a wall of certificates. Use certs to structure your learning and pass HR filters — not as a substitute for being able to actually build and operate systems. One or two well-chosen certs + strong GitHub repos is the winning combination.</p></div></div>
+
+  <div class="pnav"><a data-target="m12"><span class="pl">Prev</span><span class="pt">← Module 12 · Capstones</span></a><a class="nx" data-target="plan"><span class="pl">Next</span><span class="pt">Weekly Study Plan →</span></a></div>
+</section>
+
+<section class="view" id="plan">
+  <div class="eyebrow">Cadence</div>
+  <h1 class="title">Weekly Study Plan</h1>
+  <p class="lede">200 hours feels infinite until you schedule it. At a sustainable <strong>~13 hours/week</strong> (≈2 hrs/weekday + a weekend block), the full path takes about <strong>16 weeks</strong>. Adjust to your pace — the order matters more than the speed.</p>
+
+  <h2><span class="h2num">01</span>The 16-week schedule</h2>
+  <table class="tbl">
+    <tr><th>Week</th><th>Focus</th><th>Deliverable</th></tr>
+    <tr><td>1–2</td><td>Module 1 · Linux</td><td>Server bootstrap script in a repo</td></tr>
+    <tr><td>3</td><td>Module 2 · Git &amp; GitHub</td><td>Multi-dev PR workflow on a protected repo</td></tr>
+    <tr><td>4–5</td><td>Module 3 · Docker</td><td>3-tier app running under Docker Compose</td></tr>
+    <tr><td>6–8</td><td>Module 4 · Kubernetes</td><td>Microservices on K8s + Helm chart · sit CKAD</td></tr>
+    <tr><td>9</td><td>Module 5 · CI/CD</td><td>Full GitHub Actions pipeline with gates</td></tr>
+    <tr><td>10</td><td>Module 6 · IaC</td><td>Cloud env as Terraform modules · sit Terraform Associate</td></tr>
+    <tr><td>11</td><td>Module 7 · Cloud</td><td>Same stack on AWS/Azure/GCP · sit a Cloud Practitioner cert</td></tr>
+    <tr><td>12</td><td>Module 8 · Observability</td><td>Prometheus/Grafana/Jaeger stack + alerts</td></tr>
+    <tr><td>13</td><td>Module 9 · Security</td><td>Hardened, signed, policy-gated pipeline</td></tr>
+    <tr><td>14</td><td>Module 10 · Architecture</td><td>Netflix-scale design doc + diagram</td></tr>
+    <tr><td>15</td><td>Module 11 · Enterprise Ops</td><td>SLOs, chaos test, postmortem, cost review</td></tr>
+    <tr><td>16+</td><td>Module 12 · Capstone</td><td>One end-to-end project, portfolio-ready</td></tr>
+  </table>
+
+  <h2><span class="h2num">02</span>A sustainable weekly rhythm</h2>
+  <div class="grid g2">
+    <div class="card"><h4>Weekdays · ~2 hrs each</h4><ul class="clean" style="margin:6px 0"><li>30 min — read the concept, watch one video</li><li>60–75 min — do the lab hands-on</li><li>15 min — note what broke &amp; how you fixed it</li></ul></div>
+    <div class="card"><h4>Weekend · ~3 hr block</h4><ul class="clean" style="margin:6px 0"><li>Build/extend the module project</li><li>Push to GitHub with a clean README</li><li>Review the week's interview questions aloud</li></ul></div>
+  </div>
+
+  <div class="call best"><svg class="ci" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="cb"><span class="ct">Make it stick</span><p>Consistency beats intensity — 2 focused hours daily outperforms a 14-hour weekend cram. Always end a session by writing down one thing you learned. Teach a concept to someone (or rubber-duck it) — if you can't explain it simply, you haven't learned it yet.</p></div></div>
+
+  <div class="pnav"><a data-target="certs"><span class="pl">Prev</span><span class="pt">← Certification Roadmap</span></a><a class="nx" data-target="library"><span class="pl">Next</span><span class="pt">Resource Library →</span></a></div>
+</section>
+
+<section class="view" id="library">
+  <div class="eyebrow">Toolbox</div>
+  <h1 class="title">Resource Library</h1>
+  <p class="lede">Every resource here is free or open-source. This is the consolidated list — bookmark it. You can complete the entire path on these alone.</p>
+
+  <h2><span class="h2num">01</span>Free sandboxes &amp; labs</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9l3 2-3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="res__m"><b>Killercoda</b><span>killercoda.com · in-browser Linux/K8s/Docker scenarios</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9l3 2-3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="res__m"><b>Play with Docker / Play with Kubernetes</b><span>labs.play-with-docker.com · labs.play-with-k8s.com</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="m10 8 6 4-6 4V8Z" fill="currentColor"/><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>OverTheWire (Bandit)</b><span>overthewire.org · gamified Linux/security</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="res__m"><b>Cloud free tiers</b><span>AWS Free Tier · Azure free account · GCP $300 credit</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <h2><span class="h2num">02</span>Documentation (always the primary source)</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Docker · Kubernetes · Terraform · Helm</b><span>docs.docker.com · kubernetes.io · developer.hashicorp.com · helm.sh</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>GitHub Actions · Jenkins · GitLab CI · Argo CD</b><span>docs.github.com/actions · jenkins.io · docs.gitlab.com · argoproj.github.io</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Prometheus · Grafana · Istio · OpenTelemetry</b><span>prometheus.io · grafana.com · istio.io · opentelemetry.io</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <h2><span class="h2num">03</span>Free books &amp; deep references</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>The Linux Command Line · Pro Git</b><span>linuxcommand.org · git-scm.com/book</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>Google SRE Book &amp; Workbook</b><span>sre.google/books · reliability done right</span></div><span class="res__tag">FREE</span></div>
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="1.6"/></svg></div><div class="res__m"><b>microservices.io · Well-Architected Frameworks</b><span>architecture patterns &amp; vendor guidance</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <h2><span class="h2num">04</span>Open-source tooling to know</h2>
+  <div class="badges">
+    <span class="badge b-teal">kind / minikube / k3d</span><span class="badge b-teal">Helm / Kustomize</span><span class="badge b-teal">Trivy / Syft</span><span class="badge b-teal">cosign / Sigstore</span><span class="badge b-teal">OPA / Kyverno</span><span class="badge b-teal">Argo CD</span><span class="badge b-teal">OpenTofu</span><span class="badge b-teal">Prometheus / Grafana</span><span class="badge b-teal">OpenTelemetry / Jaeger</span><span class="badge b-teal">Falco</span><span class="badge b-teal">ShellCheck</span><span class="badge b-teal">Vault</span>
+  </div>
+
+  <h2><span class="h2num">05</span>One reference repo to start from</h2>
+  <div class="reslist">
+    <div class="res"><div class="res__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a4 4 0 0 1 1-2.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .6 1.4.2 2.4.1 2.7a4 4 0 0 1 1 2.7c0 3.9-2.3 4.8-4.6 5 .4.3.7.9.7 1.8v2.6c0 .3.2.6.7.5A10 10 0 0 0 12 2Z" fill="currentColor"/></svg></div><div class="res__m"><b>in28minutes/devops-master-class</b><span>github.com · a broad hands-on DevOps reference</span></div><span class="res__tag">FREE</span></div>
+  </div>
+
+  <hr class="div">
+  <p class="muted" style="font-size:13.5px">Built as a complete, navigable learning path — Modules 1, 3 and 4 carry the deepest treatment; the remaining modules give you the full roadmap, core concepts, a hands-on project, and curated resources, ready to expand to that same depth whenever you want to go further on a specific topic.</p>
+
+  <div class="pnav"><a data-target="plan"><span class="pl">Prev</span><span class="pt">← Weekly Study Plan</span></a><a class="nx" data-target="home"><span class="pl">Back to</span><span class="pt">Overview →</span></a></div>
+</section>
+
+</main>
+</div>
+
+<footer class="foot">
+  <span>The Pipeline · Cloud-Native &amp; DevOps Engineering Path</span>
+  <span>Self-paced · ~150–250 hrs · all resources free / open-source</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.3/mermaid.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  // ---- module registry: id, label, stage number, track color ----
+  var MODULES = [
+    ["m1","Linux Foundations","01","#64748B"],
+    ["m2","Git &amp; GitHub","02","#64748B"],
+    ["m3","Docker &amp; Containers","03","#2B57F0"],
+    ["m4","Kubernetes","04","#2B57F0"],
+    ["m5","CI/CD","05","#2B57F0"],
+    ["m6","Infrastructure as Code","06","#0C9488"],
+    ["m7","Cloud Platforms","07","#0C9488"],
+    ["m8","Observability","08","#0C9488"],
+    ["m9","Security · DevSecOps","09","#7444D9"],
+    ["m10","Cloud Architecture","10","#7444D9"],
+    ["m11","Enterprise Ops &amp; SRE","11","#D9870C"],
+    ["m12","Capstone Projects","12","#D9870C"]
+  ];
+  // ---- per-view crumb + track pill metadata ----
+  var TRACK = {
+    home:["overview","Getting Started","#2B57F0"],
+    philosophy:["learning-path","Getting Started","#2B57F0"],
+    tracks:["engineer-vs-architect","Getting Started","#2B57F0"],
+    certs:["certifications","Resources","#5B6B7F"],
+    plan:["study-plan","Resources","#5B6B7F"],
+    library:["resource-library","Resources","#5B6B7F"]
+  };
+  var TRACKNAME = {"#64748B":"Foundations","#2B57F0":"Build &amp; Ship","#0C9488":"Provision &amp; Observe","#7444D9":"Secure &amp; Design","#D9870C":"Operate &amp; Capstone"};
+  MODULES.forEach(function(m){ TRACK[m[0]] = ["module-"+m[2], TRACKNAME[m[3]], m[3]]; });
+
+  // ---- build pipeline nav ----
+  var pipe = document.getElementById("pipeline");
+  pipe.innerHTML = MODULES.map(function(m){
+    return '<a class="stage" data-target="'+m[0]+'" style="--stg:'+m[3]+'">'+
+      '<span class="stage__dot"></span><span class="stage__num">'+m[2]+'</span>'+
+      '<span class="stage__txt">'+m[1]+'</span></a>';
+  }).join("");
+
+  // ---- mermaid ----
+  var mermaidReady = false;
+  if (typeof mermaid !== "undefined") {
+    try {
+      mermaid.initialize({
+        startOnLoad:false, theme:"base", securityLevel:"loose",
+        flowchart:{useMaxWidth:true, htmlLabels:true, curve:"basis"},
+        themeVariables:{
+          fontFamily:'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize:"13px",
+          primaryColor:"#EAF0FF", primaryBorderColor:"#2B57F0", primaryTextColor:"#1B3CC0",
+          lineColor:"#7A899B", textColor:"#141E2C",
+          secondaryColor:"#EFE8FC", tertiaryColor:"#FBEFD7",
+          git0:"#2B57F0", git1:"#0C9488", gitBranchLabel0:"#fff", gitBranchLabel1:"#fff"
+        }
+      });
+      mermaidReady = true;
+    } catch(e){ mermaidReady = false; }
+  }
+  function renderDiagrams(view){
+    if(!mermaidReady) return;
+    var nodes = view.querySelectorAll('.mermaid:not([data-processed="true"])');
+    if(!nodes.length) return;
+    try { mermaid.run({ nodes: Array.prototype.slice.call(nodes) }); } catch(e){}
+  }
+
+  // ---- router ----
+  function navigate(id){
+    var view = document.getElementById(id);
+    if(!view) return;
+    var views = document.querySelectorAll(".view");
+    for(var i=0;i<views.length;i++) views[i].classList.remove("active");
+    view.classList.add("active");
+    var nav = document.querySelectorAll(".navlink,.stage");
+    for(var j=0;j<nav.length;j++) nav[j].classList.toggle("active", nav[j].getAttribute("data-target")===id);
+    var meta = TRACK[id] || ["overview","Getting Started","#2B57F0"];
+    document.getElementById("crumbName").innerHTML = meta[0];
+    document.getElementById("trackName").innerHTML = meta[1];
+    document.querySelector("#trackPill i").style.background = meta[2];
+    renderDiagrams(view);
+    window.scrollTo(0,0);
+    closeDrawer();
+    if(history.replaceState) history.replaceState(null,"","#"+id);
+  }
+  document.body.addEventListener("click", function(e){
+    var t = e.target.closest("[data-target]");
+    if(!t) return;
+    e.preventDefault();
+    navigate(t.getAttribute("data-target"));
+  });
+
+  // ---- mobile drawer ----
+  var rail = document.getElementById("rail"), scrim = document.getElementById("scrim");
+  function openDrawer(){ rail.classList.add("open"); scrim.classList.add("show"); }
+  function closeDrawer(){ rail.classList.remove("open"); scrim.classList.remove("show"); }
+  document.getElementById("menuBtn").addEventListener("click", function(){
+    rail.classList.contains("open") ? closeDrawer() : openDrawer();
+  });
+  scrim.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeDrawer(); });
+
+  // ---- initial render (handles deep-links) ----
+  function boot(){
+    var hash = (location.hash || "").replace("#","");
+    var start = document.getElementById(hash) ? hash : "home";
+    navigate(start);
+  }
+  if(document.readyState!=="loading") boot(); else document.addEventListener("DOMContentLoaded", boot);
+})();
+</script>
+</body>
+</html>
