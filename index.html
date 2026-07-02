@@ -1,765 +1,375 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Instruments & Courses</title>
-    <link rel="icon" type="image/png" href="/logo.png">
-    <meta name="description" content="A working collection of AI instruments and courses from Dipayan — tools built, tested, and kept running at the seam between engineering and intelligence.">
-    <meta name="theme-color" content="#e9edf0" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0d0f13" media="(prefers-color-scheme: dark)">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
-
-    <script>
-        try {
-            var t = localStorage.getItem('theme') ||
-                ((window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
-    </script>
-
+    <title>AiLab - Instruments & Courses</title>
+    <meta name="description" content="A working collection of AI instruments and courses. Professionally built, rigorously tested, and continuously deployed for modern engineering workflows.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Spline+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-        /* ============================================================
-           THEME TOKENS
-           ============================================================ */
-        :root[data-theme="light"] {
-            --paper:        #e9edf0;
-            --panel:        #fbfcfd;
-            --ink:          #14171c;
-            --muted:        #5b636c;
-            --faint:        #8a929b;
-            --line:         #d3dade;
-            --grid:         #dde3e8;
-            --accent:       #0c7a73;
-            --accent-soft:  #0a655f;
-            --trace:        #0c9c92;
-            --chip-border:  #cbd3d9;
-            --glow:         transparent;
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        background: 'var(--background)',
+                        surface: 'var(--surface)',
+                        border: 'var(--border)',
+                        foreground: 'var(--foreground)',
+                        muted: 'var(--muted)',
+                        primary: 'var(--primary)',
+                        'primary-foreground': 'var(--primary-foreground)',
+                    }
+                }
+            }
         }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --background: #f8fafc;
+                --surface: #ffffff;
+                --border: #e2e8f0;
+                --foreground: #0f172a;
+                --muted: #64748b;
+                --primary: #2563eb;
+                --primary-foreground: #ffffff;
+            }
 
-        :root[data-theme="dark"] {
-            --paper:        #0d0f13;
-            --panel:        #14171d;
-            --ink:          #eceff2;
-            --muted:        #8b939d;
-            --faint:        #69707a;
-            --line:         #232a32;
-            --grid:         #1a212a;
-            --accent:       #2dd4bf;
-            --accent-soft:  #5eead4;
-            --trace:        #2dd4bf;
-            --chip-border:  #2a323b;
-            --glow:         rgba(45, 212, 191, 0.55);
+            .dark {
+                --background: #020617;
+                --surface: #0f172a;
+                --border: #1e293b;
+                --foreground: #f8fafc;
+                --muted: #94a3b8;
+                --primary: #3b82f6;
+                --primary-foreground: #ffffff;
+            }
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        *, *::before, *::after { -webkit-tap-highlight-color: transparent; }
-
-        html {
-            scroll-behavior: smooth;
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
-
+        
         body {
-            font-family: 'Spline Sans', system-ui, -apple-system, sans-serif;
-            background-color: var(--paper);
-            color: var(--ink);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-            overflow-x: hidden;
-            overscroll-behavior-y: contain;
-            transition: background-color 0.35s ease, color 0.35s ease;
+            background-color: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        a, button { touch-action: manipulation; }
-
-        .wrap {
-            width: 100%; max-width: 1040px; margin: 0 auto;
-            padding-left: max(2rem, env(safe-area-inset-left));
-            padding-right: max(2rem, env(safe-area-inset-right));
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, #80808012 1px, transparent 1px),
+                              linear-gradient(to bottom, #80808012 1px, transparent 1px);
+            background-size: 24px 24px;
+            mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
         }
 
-        .sr-only {
-            position: absolute; width: 1px; height: 1px;
-            padding: 0; margin: -1px; overflow: hidden;
-            clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .mono {
-            font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-        }
-
-        /* ============================================================
-           TOP BAR
-           ============================================================ */
-        .topbar {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 1rem;
-            padding-top: max(2rem, env(safe-area-inset-top));
-            padding-bottom: 2rem;
-        }
-
-        .mark {
-            display: inline-flex; align-items: center; gap: 0.6rem;
-            color: var(--ink); font-weight: 600;
-            min-width: 0;
-        }
-        .mark-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            flex: none;
-            background: var(--accent);
-            box-shadow: 0 0 0 0 var(--glow);
-        }
-        .mark-text { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.78rem; letter-spacing: 0.18em; white-space: nowrap; }
-
-        .switch {
-            position: relative;
-            display: inline-flex;
-            align-items: stretch;
-            flex: none;
-            border: 1px solid var(--line);
-            background: var(--panel);
-            border-radius: 999px;
-            padding: 4px;
-            cursor: pointer;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            transition: border-color 0.25s ease, background-color 0.35s ease;
-        }
-        .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-        .switch:active { border-color: var(--accent); }
-        .switch-knob {
-            position: absolute;
-            top: 4px; left: 4px;
-            width: calc(50% - 4px);
-            height: calc(100% - 8px);
-            border-radius: 999px;
-            background: var(--accent);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        :root[data-theme="dark"] .switch-knob { transform: translateX(100%); }
-        .switch-opt {
-            position: relative; z-index: 1;
-            min-width: 4.1rem;
-            display: inline-flex; align-items: center; justify-content: center;
-            padding: 0.5rem 0.3rem;
-            font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
-            color: var(--muted);
-            transition: color 0.3s ease;
-        }
-        :root[data-theme="light"] .opt-paper,
-        :root[data-theme="dark"]  .opt-panel { color: #ffffff; font-weight: 500; }
-
-        /* ============================================================
-           HERO
-           ============================================================ */
-        .hero { padding-top: 3.5rem; }
-
-        .eyebrow { color: var(--accent-soft); }
-
-        .hero h1 {
-            font-family: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-            font-weight: 400;
-            font-size: clamp(3rem, 9vw, 6.4rem);
-            line-height: 0.96;
-            letter-spacing: -0.01em;
-            margin: 1.1rem 0 1.4rem;
-        }
-        .hero h1 em { font-style: italic; color: var(--accent-soft); }
-
-        .tagline {
-            color: var(--muted);
-            font-size: clamp(1.02rem, 1.6vw, 1.18rem);
-            max-width: 56ch;
-            font-weight: 300;
-        }
-
-        .readout { margin-top: 3rem; }
-
-        .readout-cap {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 1rem; flex-wrap: wrap;
-            color: var(--faint);
-            margin-bottom: 0.75rem;
-        }
-        .live { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--muted); }
-        .blip {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: var(--accent);
-            display: inline-block;
-            box-shadow: 0 0 6px var(--glow);
-        }
-
-        .scope {
-            position: relative;
-            height: clamp(96px, 17vh, 168px);
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            overflow: hidden;
-            background:
-                repeating-linear-gradient(to right, transparent 0, transparent 39px, var(--grid) 39px, var(--grid) 40px),
-                repeating-linear-gradient(to bottom, transparent 0, transparent 39px, var(--grid) 39px, var(--grid) 40px),
-                var(--panel);
-            transition: background-color 0.35s ease, border-color 0.35s ease;
-        }
-        .scope svg { display: block; width: 100%; height: 100%; }
-        .scope-base { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
-        .trace {
-            fill: none;
-            stroke: var(--trace);
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            vector-effect: non-scaling-stroke;
-            filter: drop-shadow(0 0 5px var(--glow));
-        }
-
-        .node { stroke-width: 2; vector-effect: non-scaling-stroke; }
-        .node-live { fill: var(--accent); stroke: var(--accent); filter: drop-shadow(0 0 5px var(--glow)); }
-        .node-open { fill: var(--panel); stroke: var(--faint); }
-
-        .scope svg text { font-family: 'JetBrains Mono', ui-monospace, monospace; text-anchor: middle; }
-        .node-label { font-size: 10.5px; letter-spacing: 0.05em; fill: var(--faint); }
-
-        /* ============================================================
-           PRODUCTS
-           ============================================================ */
-        .products { margin-top: 4.5rem; }
-
-        .products-head {
-            display: flex; align-items: baseline; justify-content: space-between;
-            gap: 1rem; flex-wrap: wrap;
-            color: var(--faint);
-            padding-bottom: 0.9rem;
-            margin-bottom: 2.1rem;
-            border-bottom: 1.5px solid var(--ink);
-        }
-
-        .product-group + .product-group { margin-top: 2.4rem; }
-
-        .group-label {
-            display: block;
-            color: var(--faint);
-            margin-bottom: 0.9rem;
-        }
-
-        .card {
-            position: relative;
-            display: block;
-            text-decoration: none;
-            color: inherit;
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:focus-visible {
-            outline: none;
-            border-color: var(--accent);
-            transform: translateY(-3px);
-            box-shadow: 0 16px 30px -20px rgba(0,0,0,0.35);
-        }
-        :root[data-theme="dark"] .card:focus-visible {
-            box-shadow: 0 0 0 1px var(--accent), 0 18px 32px -16px rgba(0,0,0,0.6);
-        }
-        .card:focus-visible .card-icon  { border-color: var(--accent); background: var(--paper); }
-        .card:focus-visible .card-arrow { color: var(--accent); transform: translateX(5px); }
-        .card:focus-visible .card-tag   { border-color: var(--accent); color: var(--accent); }
-        .card:focus-visible .card-cta   { color: var(--accent); }
-        .card:focus-visible .card-cta svg { transform: translateX(4px); }
-
-        .card:active {
-            border-color: var(--accent);
-            transform: translateY(-1px) scale(0.992);
-        }
-        :root[data-theme="dark"] .card:active { box-shadow: 0 0 0 1px var(--accent); }
-        .card:active .card-icon  { border-color: var(--accent); }
-        .card:active .card-arrow { color: var(--accent); transform: translateX(3px); }
-        .card:active .card-tag   { border-color: var(--accent); color: var(--accent); }
-        .card:active .card-cta   { color: var(--accent); }
-
-        .card-icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            flex: none;
-            width: 2.6rem; height: 2.6rem;
-            border-radius: 8px;
-            border: 1px solid var(--chip-border);
-            color: var(--accent-soft);
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-        }
-
-        .card-arrow {
-            color: var(--faint);
-            display: inline-flex;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-
-        .card-tag {
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
-            color: var(--muted);
-            border: 1px solid var(--chip-border);
-            border-radius: 4px;
-            padding: 0.28rem 0.5rem;
-            transition: border-color 0.2s ease, color 0.2s ease;
-        }
-
-        .card-status {
-            display: inline-flex; align-items: center; gap: 0.45rem;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--muted);
-        }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; }
-        .status-live { background: var(--accent); box-shadow: 0 0 6px var(--glow); }
-        .status-open { background: transparent; border: 1.5px solid var(--faint); }
-
-        .card-cta {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
-            color: var(--faint);
-            margin-left: auto;
-            transition: color 0.2s ease;
-        }
-        .card-cta svg { transition: transform 0.2s ease; }
-
-        @media (hover: hover) and (pointer: fine) {
-            .switch:hover { border-color: var(--accent); }
-
-            .card:hover {
-                border-color: var(--accent);
-                transform: translateY(-3px);
-                box-shadow: 0 16px 30px -20px rgba(0,0,0,0.35);
-            }
-            :root[data-theme="dark"] .card:hover {
-                box-shadow: 0 0 0 1px var(--accent), 0 18px 32px -16px rgba(0,0,0,0.6);
-            }
-            .card:hover .card-icon  { border-color: var(--accent); background: var(--paper); }
-            .card:hover .card-arrow { color: var(--accent); transform: translateX(5px); }
-            .card:hover .card-tag   { border-color: var(--accent); color: var(--accent); }
-            .card:hover .card-cta   { color: var(--accent); }
-            .card:hover .card-cta svg { transform: translateX(4px); }
-        }
-
-        .card-featured {
-            padding: 1.85rem 1.9rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            grid-template-areas:
-                "icon name arrow"
-                "icon desc desc"
-                "icon foot foot";
-            column-gap: 1.4rem;
-            row-gap: 0.6rem;
-            align-items: start;
-        }
-        .card-featured .card-icon  { grid-area: icon; }
-        .card-featured .card-arrow { grid-area: arrow; justify-self: end; }
-        .card-featured .card-name {
-            grid-area: name;
-            align-self: center;
-            font-family: 'Instrument Serif', Georgia, serif;
-            font-size: clamp(1.5rem, 2.8vw, 1.95rem);
-            line-height: 1.15;
-        }
-        .card-featured .card-desc {
-            grid-area: desc;
-            color: var(--muted);
-            font-size: 0.95rem; font-weight: 300;
-            max-width: 58ch;
-        }
-        .card-featured .card-foot {
-            grid-area: foot;
-            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
-            margin-top: 0.35rem;
-        }
-
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.1rem;
-        }
-        .card-course {
-            padding: 1.6rem 1.7rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-        }
-        .card-course .card-top {
-            display: flex; align-items: center; gap: 0.9rem;
-        }
-        .card-course .card-name {
-            font-family: 'Instrument Serif', Georgia, serif;
-            font-size: clamp(1.35rem, 2.4vw, 1.55rem);
-            line-height: 1.18;
-        }
-        .card-course .card-desc {
-            color: var(--muted);
-            font-size: 0.92rem; font-weight: 300;
-            flex-grow: 1;
-        }
-        .card-course .card-foot {
-            display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--line);
-        }
-
-        /* ============================================================
-           FOOTER
-           ============================================================ */
-        footer {
-            margin-top: auto;
-            border-top: 1px solid var(--line);
-            padding-top: 2rem;
-            padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
-        }
-        .footer-row {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 1rem; flex-wrap: wrap;
-            color: var(--faint);
-        }
-        .footer-row .left { 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 0.5rem; 
-            color: var(--muted); 
-            font-size: 0.9rem; 
-        }
-
-        .footer-logo {
-            height: 1.2rem;
-            width: auto;
-            border-radius: 4px;
-        }
-
-        /* ============================================================
-           MOTION
-           ============================================================ */
-        @media (prefers-reduced-motion: no-preference) {
-            .trace {
-                stroke-dasharray: 1;
-                stroke-dashoffset: 1;
-                animation: draw 1.9s cubic-bezier(0.4, 0, 0.2, 1) 0.25s forwards;
-            }
-            @keyframes draw { to { stroke-dashoffset: 0; } }
-
-            .blip, .mark-dot, .node-live { animation: pulse 2.4s ease-in-out infinite; }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-
-            .reveal { opacity: 0; transform: translateY(10px); animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-            .d1 { animation-delay: 0.05s; }
-            .d2 { animation-delay: 0.13s; }
-            .d3 { animation-delay: 0.21s; }
-            .d4 { animation-delay: 0.34s; }
-            .e1 { animation-delay: 0.5s; }
-            .e2 { animation-delay: 0.6s; }
-            .e3 { animation-delay: 0.7s; }
-            .e4 { animation-delay: 0.8s; }
-            .e5 { animation-delay: 0.9s; }
-            .e6 { animation-delay: 1.0s; }
-            .e7 { animation-delay: 1.1s; }
-            @keyframes rise { to { opacity: 1; transform: translateY(0); } }
-        }
-
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (max-width: 720px) {
-            .wrap {
-                padding-left: max(1.25rem, env(safe-area-inset-left));
-                padding-right: max(1.25rem, env(safe-area-inset-right));
-            }
-            .hero { padding-top: 2.5rem; }
-            .course-grid { grid-template-columns: 1fr; }
-            .card-featured { padding: 1.5rem 1.25rem; column-gap: 1rem; }
-            .card-course { padding: 1.4rem 1.45rem; }
-        }
-
-        @media (max-width: 480px) {
-            .topbar { gap: 0.6rem; }
-            .mark-text { font-size: 0.66rem; letter-spacing: 0.13em; }
-            .switch-opt { min-width: 3.1rem; font-size: 0.6rem; padding: 0.46rem 0.2rem; }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
         }
     </style>
+    <script>
+        // Theme initialization
+        function initTheme() {
+            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                html.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const themeBtn = document.getElementById('theme-toggle');
+            if(themeBtn) {
+                if (isDark) {
+                    themeBtn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
+                } else {
+                    themeBtn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
+                }
+                lucide.createIcons();
+            }
+        }
+
+        // Initialize immediately
+        initTheme();
+
+        // When DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeIcon();
+            lucide.createIcons();
+        });
+    </script>
 </head>
-<body>
-
-    <div class="wrap">
-        <header class="topbar">
-            <span class="mark">
-                <span class="mark-dot" aria-hidden="true"></span>
-                <span class="mark-text">AiLab</span>
-            </span>
-
-            <button class="switch" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
-                <span class="switch-knob" aria-hidden="true"></span>
-                <span class="switch-opt opt-paper">Paper</span>
-                <span class="switch-opt opt-panel">Panel</span>
-            </button>
-        </header>
-    </div>
-
-    <div class="wrap">
-        <section class="hero">
-            <p class="mono eyebrow reveal d1">EST. 2026</p>
-            <h1 class="reveal d2">AI <em>Laboratory</em></h1>
-            <p class="tagline reveal d3">A working collection of AI instruments and courses — tools I build, test, and keep running at the seam between engineering and intelligence.</p>
-
-            <div class="readout reveal d4">
-                <div class="readout-cap mono">
-                    <span>INSTRUMENT STATUS</span>
-                    <span class="live"><i class="blip" aria-hidden="true"></i> LIVE · SYSTEM ONLINE</span>
+<body class="min-h-screen font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300">
+    
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 w-full border-b border-border bg-surface/80 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
                 </div>
-                <div class="scope" aria-hidden="true">
-                    <svg viewBox="0 0 1000 160" preserveAspectRatio="none" focusable="false">
-                        <path class="scope-base" d="M0 70 H1000"/>
-                        <path class="trace" pathLength="1"
-                            d="M0 70 H70 V30 H150 V70 H200 V30 H280 V70 H330 V30 H410 V70 H460 V30 H540 V70 H590 V30 H670 V70 H720 V30 H800 V70 H850 V30 H930 V70 H1000"/>
+                <span class="font-bold text-lg tracking-tight">AiLab</span>
+            </div>
+            <button 
+                id="theme-toggle" 
+                onclick="toggleTheme()" 
+                class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-muted hover:text-foreground cursor-pointer"
+                aria-label="Toggle theme"
+            >
+                <!-- Icon injected via JS -->
+            </button>
+        </div>
+    </nav>
 
-                        <circle class="node node-live" cx="110" cy="30" r="6"/>
-                        <circle class="node node-open" cx="240" cy="30" r="6"/>
-                        <circle class="node node-open" cx="370" cy="30" r="6"/>
-                        <circle class="node node-open" cx="500" cy="30" r="6"/>
-                        <circle class="node node-open" cx="630" cy="30" r="6"/>
-                        <circle class="node node-open" cx="760" cy="30" r="6"/>
-                        <circle class="node node-open" cx="890" cy="30" r="6"/>
-
-                        <text class="node-label" x="110" y="112">OPTIMIZER</text>
-                        <text class="node-label" x="240" y="112">LEGAL AI</text>
-                        <text class="node-label" x="370" y="112">AI MASTER</text>
-                        <text class="node-label" x="500" y="112">CLOUD</text>
-                        <text class="node-label" x="630" y="112">PYTHON</text>
-                        <text class="node-label" x="760" y="112">SQL</text>
-                        <text class="node-label" x="890" y="112">DEVOPS</text>
-                    </svg>
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        <!-- Hero Section -->
+        <section class="py-20 md:py-28 relative">
+            <div class="absolute inset-0 bg-grid-pattern -z-10"></div>
+            
+            <div class="max-w-3xl animate-fade-in-up">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6 border border-primary/20 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    Platform Active
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.15]">
+                    Enterprise AI <br class="hidden md:block"/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">
+                        Instruments & Courses
+                    </span>
+                </h1>
+                <p class="text-lg md:text-xl text-muted font-light leading-relaxed mb-8 max-w-2xl">
+                    A curated collection of AI instruments and courses. Professionally built, rigorously tested, and continuously deployed for modern engineering workflows.
+                </p>
+                <div class="flex items-center gap-4">
+                    <a href="#instruments" class="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-sm cursor-pointer">
+                        Explore Instruments
+                    </a>
+                    <a href="#courses" class="px-6 py-3 rounded-lg bg-surface border border-border font-medium hover:bg-foreground/5 transition-colors cursor-pointer">
+                        View Courses
+                    </a>
                 </div>
             </div>
         </section>
 
-        <section class="products" aria-label="Projects and courses">
-            <div class="products-head mono">
-                <span>BUILD INDEX</span>
-                <span>07 ENTRIES · 2026</span>
+        <!-- Instruments Section -->
+        <section id="instruments" class="py-12 scroll-mt-20">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-border">
+                <h2 class="text-2xl font-bold tracking-tight">Active Instruments</h2>
+                <span class="text-xs font-bold uppercase tracking-wider text-muted bg-border/50 px-3 py-1 rounded-md">1 Tool</span>
             </div>
-
-            <div class="product-group">
-                <span class="group-label mono">Instrument</span>
-
-                <a class="card card-featured reveal e1" href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer"
-                   aria-label="Open Prompt Token Optimizer — tool, live, opens in a new tab">
-                    <span class="card-icon" aria-hidden="true">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="4" y1="6" x2="20" y2="6"></line>
-                            <circle cx="9" cy="6" r="2"></circle>
-                            <line x1="4" y1="12" x2="20" y2="12"></line>
-                            <circle cx="15" cy="12" r="2"></circle>
-                            <line x1="4" y1="18" x2="20" y2="18"></line>
-                            <circle cx="11" cy="18" r="2"></circle>
-                        </svg>
-                    </span>
-                    <span class="card-arrow" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </span>
-                    <h3 class="card-name">Prompt Token Optimizer</h3>
-                    <p class="card-desc">Analyze and compress LLM prompts for maximum efficiency without losing semantic integrity.</p>
-                    <div class="card-foot">
-                        <span class="card-tag">Tool</span>
-                        <span class="card-status"><span class="status-dot status-live" aria-hidden="true"></span> Live</span>
-                        <span class="card-cta">Launch
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                        </span>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Tool Card -->
+                <a href="/prompt_optimiser/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="sliders-horizontal" class="w-6 h-6 stroke-[1.5]"></i>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Tool</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-green-500/10 text-green-600 dark:text-green-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                Live
+                            </span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">Prompt Token Optimizer</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Analyze and compress LLM prompts for maximum efficiency without losing semantic integrity.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Open Tool</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
                     </div>
                 </a>
             </div>
+        </section>
 
-            <div class="product-group">
-                <span class="group-label mono">Courses</span>
-
-                <div class="course-grid">
-                    <a class="card card-course reveal e2" href="/ai-course-for-legal-professionals" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open AI for Legal Professionals — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 6 C10 4.5 7 4 4 4.5 V18 C7 17.5 10 18 12 19.5 C14 18 17 17.5 20 18 V4.5 C17 4 14 4.5 12 6 Z"/>
-                                    <line x1="12" y1="6" x2="12" y2="19.5"/>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">AI for Legal Professionals</h3>
+        <!-- Courses Section -->
+        <section id="courses" class="py-12 scroll-mt-20">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-border">
+                <h2 class="text-2xl font-bold tracking-tight">Professional Courses</h2>
+                <span class="text-xs font-bold uppercase tracking-wider text-muted bg-border/50 px-3 py-1 rounded-md">6 Courses</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Course Card -->
+                <a href="/ai-course-for-legal-professionals" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="scale" class="w-6 h-6 stroke-[1.5]"></i>
                         </div>
-                        <p class="card-desc">Apply AI to legal research, drafting, and analysis to modernize your workflows.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
                             </span>
                         </div>
-                    </a>
-
-                    <a class="card card-course reveal e3" href="/ai-masterclass/" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open AI Masterclass — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="9" r="5.5"/>
-                                    <line x1="9" y1="13.8" x2="7.5" y2="21"/>
-                                    <line x1="15" y1="13.8" x2="16.5" y2="21"/>
-                                    <line x1="7.5" y1="21" x2="9.5" y2="19"/>
-                                    <line x1="16.5" y1="21" x2="14.5" y2="19"/>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">AI Masterclass</h3>
-                        </div>
-                        <p class="card-desc">A deep dive into advanced AI concepts, modern workflows, and practical applications.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                            </span>
-                        </div>
-                    </a>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">AI for Legal Professionals</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Apply AI to legal research, drafting, and analysis to modernize your workflows.</p>
                     
-                    <a class="card card-course reveal e4" href="/cloud-masterclass/" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open Cloud Masterclass — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">Cloud Masterclass</h3>
-                        </div>
-                        <p class="card-desc">Master modern cloud architecture, scalable deployment strategies, and infrastructure.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                            </span>
-                        </div>
-                    </a>
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
 
-                    <a class="card card-course reveal e5" href="/python-masterclass/" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open Python Masterclass — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="16 18 22 12 16 6"></polyline>
-                                    <polyline points="8 6 2 12 8 18"></polyline>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">Python Masterclass</h3>
+                <!-- Course Card -->
+                <a href="/ai-masterclass/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="brain" class="w-6 h-6 stroke-[1.5]"></i>
                         </div>
-                        <p class="card-desc">Learn advanced Python programming for data pipelines, automation, and AI systems.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
                             </span>
                         </div>
-                    </a>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">AI Masterclass</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">A deep dive into advanced AI concepts, modern workflows, and practical applications.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
 
-                    <a class="card card-course reveal e6" href="/sql-masterclass/" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open SQL Masterclass — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">SQL Masterclass</h3>
+                <!-- Course Card -->
+                <a href="/cloud-masterclass/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="cloud" class="w-6 h-6 stroke-[1.5]"></i>
                         </div>
-                        <p class="card-desc">Master database querying, structural data modeling, and robust relational design.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
                             </span>
                         </div>
-                    </a>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">Cloud Masterclass</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Master modern cloud architecture, scalable deployment strategies, and infrastructure.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
+                
+                <!-- Course Card -->
+                <a href="/python-masterclass/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="code-2" class="w-6 h-6 stroke-[1.5]"></i>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
+                            </span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">Python Masterclass</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Learn advanced Python programming for data pipelines, automation, and AI systems.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
 
-                    <a class="card card-course reveal e7" href="/devops-engineer/" target="_blank" rel="noopener noreferrer"
-                       aria-label="Open Cloud Native DevOps Engineer — course, open, opens in a new tab">
-                        <div class="card-top">
-                            <span class="card-icon" aria-hidden="true">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg>
-                            </span>
-                            <h3 class="card-name">Cloud Native DevOps Engineer</h3>
+                <!-- Course Card -->
+                <a href="/sql-masterclass/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="database" class="w-6 h-6 stroke-[1.5]"></i>
                         </div>
-                        <p class="card-desc">Build CI/CD pipelines, containerize applications, and master infrastructure automation.</p>
-                        <div class="card-foot">
-                            <span class="card-tag">Course</span>
-                            <span class="card-status"><span class="status-dot status-open" aria-hidden="true"></span> Open</span>
-                            <span class="card-cta">Enroll
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
                             </span>
                         </div>
-                    </a>
-                </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">SQL Masterclass</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Master database querying, structural data modeling, and robust relational design.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
+
+                <!-- Course Card -->
+                <a href="/devops-engineer/" target="_blank" rel="noopener noreferrer" class="group flex flex-col bg-surface border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30">
+                    <div class="flex items-start justify-between mb-5">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <i data-lucide="boxes" class="w-6 h-6 stroke-[1.5]"></i>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-muted bg-foreground/5 px-2 py-1 rounded-md">Course</span>
+                            <span class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                Open
+                            </span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">Cloud Native DevOps Engineer</h3>
+                    <p class="text-sm text-muted line-clamp-2 mb-6 flex-grow leading-relaxed">Build CI/CD pipelines, containerize applications, and master infrastructure automation.</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors">View Course</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all"></i>
+                    </div>
+                </a>
             </div>
         </section>
-    </div>
+    </main>
 
-    <footer>
-        <div class="wrap">
-            <div class="footer-row mono">
-                <span class="left">
-                    <img src="/logo.png" alt="DD Logo" class="footer-logo">
-                    © 2026 Dipayan
-                </span>
-                <span>MAINTAINED 2026</span>
+    <!-- Footer -->
+    <footer class="border-t border-border bg-surface mt-12">
+        <div class="max-w-6xl mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2 text-muted">
+                    <i data-lucide="hexagon" class="w-5 h-5"></i>
+                    <span class="font-medium text-sm">© 2026 AiLab. All rights reserved.</span>
+                </div>
+                <div class="flex items-center gap-6 text-sm text-muted font-medium">
+                    <a href="#" class="hover:text-foreground transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-foreground transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-foreground transition-colors">Contact</a>
+                </div>
             </div>
         </div>
     </footer>
-
-    <script>
-        (function () {
-            var root = document.documentElement;
-            var btn = document.getElementById('theme-toggle');
-
-            function sync(theme) {
-                var dark = theme === 'dark';
-                btn.setAttribute('aria-pressed', String(dark));
-                btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-            }
-
-            sync(root.getAttribute('data-theme'));
-
-            btn.addEventListener('click', function () {
-                var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                root.setAttribute('data-theme', next);
-                sync(next);
-                try { localStorage.setItem('theme', next); } catch (e) {}
-            });
-        })();
-    </script>
 </body>
 </html>
