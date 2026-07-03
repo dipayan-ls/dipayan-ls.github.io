@@ -42,7 +42,7 @@
   --shadow-lg:0 2px 8px rgba(0,0,0,.4),0 18px 50px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
+html{scroll-padding-top:84px}
 body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--serif);
   font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased;font-optical-sizing:auto}
 a{color:var(--primary);text-decoration:none}
@@ -947,7 +947,7 @@ Cloud Run auto-scales by requests (and to zero); you pay for what runs.</p></div
     </div>
   </main>
 </div>
-<button class="ax-backtop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#8593;</button>
+<button class="ax-backtop" onclick="axScrollTop()" aria-label="Back to top">&#8593;</button>
 <script>window.__AXDICT__=[{"t": "AI agent"}, {"t": "App Engine"}, {"t": "Availability Zone"}, {"t": "BigQuery"}, {"t": "Bigtable"}, {"t": "Budgets & alerts"}, {"t": "CapEx"}, {"t": "CDN"}, {"t": "Cloud Armor"}, {"t": "Cloud computing"}, {"t": "Cloud Functions"}, {"t": "Cloud Logging"}, {"t": "Cloud Monitoring"}, {"t": "Cloud NAT"}, {"t": "Cloud Run"}, {"t": "Cloud Shell"}, {"t": "Cloud Spanner"}, {"t": "Cloud SQL"}, {"t": "Cloud Storage"}, {"t": "Committed-use discount"}, {"t": "Compute"}, {"t": "Compute Engine"}, {"t": "Container"}, {"t": "Data lake"}, {"t": "Data residency"}, {"t": "Data warehouse"}, {"t": "Dataflow"}, {"t": "Defense in depth"}, {"t": "Disaster recovery"}, {"t": "DNS"}, {"t": "Docker"}, {"t": "DynamoDB"}, {"t": "EC2"}, {"t": "Elasticity"}, {"t": "Encryption at rest"}, {"t": "Encryption in transit"}, {"t": "FinOps"}, {"t": "Firestore"}, {"t": "Firewall rule"}, {"t": "Foundation model"}, {"t": "gcloud"}, {"t": "Gemini"}, {"t": "Generative AI"}, {"t": "GKE"}, {"t": "Hallucination"}, {"t": "High availability"}, {"t": "Hybrid cloud"}, {"t": "Hypervisor"}, {"t": "IaaS"}, {"t": "IAM"}, {"t": "Image"}, {"t": "Infrastructure as Code"}, {"t": "IP address"}, {"t": "Kubernetes"}, {"t": "Lambda"}, {"t": "Landing zone"}, {"t": "Latency"}, {"t": "Least privilege"}, {"t": "Lifecycle policy"}, {"t": "LLM"}, {"t": "Load balancer"}, {"t": "Looker"}, {"t": "Machine type"}, {"t": "Managed Instance Group"}, {"t": "Microservices"}, {"t": "Migration ('the R's)"}, {"t": "Monolith"}, {"t": "Multi-cloud"}, {"t": "Multimodal"}, {"t": "Networking"}, {"t": "On-premises"}, {"t": "OpEx"}, {"t": "PaaS"}, {"t": "Persistent Disk"}, {"t": "Private cloud"}, {"t": "Project"}, {"t": "Prompt"}, {"t": "Pub/Sub"}, {"t": "Public cloud"}, {"t": "RAG"}, {"t": "RDS"}, {"t": "Redshift"}, {"t": "Region"}, {"t": "Resource hierarchy"}, {"t": "Responsible AI"}, {"t": "Role"}, {"t": "RPO"}, {"t": "RTO"}, {"t": "S3"}, {"t": "SaaS"}, {"t": "Security Command Center"}, {"t": "Serverless"}, {"t": "Service account"}, {"t": "Shared fate"}, {"t": "Shared responsibility model"}, {"t": "SLA / SLO / SLI"}, {"t": "Snapshot"}, {"t": "Spot VM"}, {"t": "SQS / SNS"}, {"t": "Storage"}, {"t": "Storage class"}, {"t": "Subnet"}, {"t": "TCO"}, {"t": "Terraform"}, {"t": "Vertex AI"}, {"t": "Virtual machine (VM)"}, {"t": "VPC"}, {"t": "Well-Architected Framework"}, {"t": "Zero Trust"}, {"t": "Zone"}];</script>
 <script>
 (function(){try{var t=localStorage.getItem('cm-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
@@ -975,30 +975,37 @@ function axCloseSearch(){setTimeout(function(){document.getElementById('ax-searc
 function axGlossFilter(q){q=q.trim().toLowerCase();var shown=0;document.querySelectorAll('.ax-term').forEach(function(t){var hit=t.dataset.search.indexOf(q)>=0;t.style.display=hit?'':'none';if(hit)shown++;});var c=document.getElementById('ax-gloss-count');if(c)c.textContent=shown+' terms';}
 /* ---------- robust anchor navigation (fixes long-link drift from font/diagram reflow) ---------- */
 var AX_HEADER_OFFSET=72;
+var axSettleTimer=null;
 function axScrollTo(hash){
   var el;try{el=document.querySelector(hash);}catch(e){return;}
   if(!el)return;
-  var want=function(){return el.getBoundingClientRect().top+window.pageYOffset-AX_HEADER_OFFSET;};
+  if(axSettleTimer){clearTimeout(axSettleTimer);axSettleTimer=null;}
+  var want=function(){return Math.max(0,el.getBoundingClientRect().top+window.pageYOffset-AX_HEADER_OFFSET);};
   var target=want();
   var dist=Math.abs(target-window.pageYOffset);
   var vh=window.innerHeight||800;
-  // Long jumps (e.g. Part 1 -> Part 12) feel slow/broken as a native smooth
-  // scroll — jump instantly. Short jumps stay smooth, which is the case
-  // that actually benefits from animation.
+  // Long jumps (e.g. Part 1 -> the end) are instant; CSS scroll-behavior is
+  // intentionally NOT set to smooth, so behavior:'auto' is genuinely instant.
+  // Short jumps animate, which is the only case where animation feels good.
   var isLong=dist>vh*1.5;
   window.scrollTo({top:target,behavior:isLong?'auto':'smooth'});
-  // Correct once or twice for late-settling reflow (fonts, mermaid diagrams
-  // rendering async) — but only AFTER the initial jump/animation has had
-  // time to finish, never while it's still in flight, or the correction
-  // itself looks like a stutter.
+  // Correct for late-settling reflow (fonts / mermaid diagrams above the
+  // target changing heights after render). Corrections are always instant
+  // and only start after any short-jump animation has finished.
   var tries=0;
   function settle(){
+    axSettleTimer=null;
     tries++;
     var y=want();
     if(Math.abs(window.pageYOffset-y)>3){window.scrollTo({top:y,behavior:'auto'});}
-    if(tries<3)setTimeout(settle,350);
+    if(tries<5){axSettleTimer=setTimeout(settle,300);}
   }
-  setTimeout(settle,isLong?120:500);
+  axSettleTimer=setTimeout(settle,isLong?100:500);
+}
+function axScrollTop(){
+  if(axSettleTimer){clearTimeout(axSettleTimer);axSettleTimer=null;}
+  var vh=window.innerHeight||800;
+  window.scrollTo({top:0,behavior:window.pageYOffset>vh*1.5?'auto':'smooth'});
 }
 document.addEventListener('click',function(e){
   var a=e.target.closest('a[href^="#"]');
@@ -1012,6 +1019,13 @@ document.addEventListener('click',function(e){
   axCloseMenu();
   axCloseSearch();
   axScrollTo(hash);
+});
+// The moment the user scrolls by hand, stop any pending post-jump
+// corrections — otherwise the page "snaps back" against their input.
+['wheel','touchstart','keydown'].forEach(function(ev){
+  window.addEventListener(ev,function(){
+    if(axSettleTimer){clearTimeout(axSettleTimer);axSettleTimer=null;}
+  },{passive:true});
 });
 document.addEventListener('DOMContentLoaded',function(){axInitProgress();var fp=document.querySelector('.ax-navpart');if(fp)fp.classList.add('open');window.addEventListener('scroll',axSpyRaf,{passive:true});axSpy();if(window.mermaid){mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{fontFamily:'Inter,sans-serif',primaryColor:'#eceffc',primaryBorderColor:'#2f47c9',primaryTextColor:'#1b2030',lineColor:'#8b93a3',secondaryColor:'#e1f3f1',tertiaryColor:'#fbf0d8'}});}try{AX_DICT=window.__AXDICT__||[];}catch(e){}});
 </script>
