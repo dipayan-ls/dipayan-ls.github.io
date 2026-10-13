@@ -9,21 +9,37 @@
       margin: 0;
       padding: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: #0f172a;
       color: #f8fafc;
+      gap: 1.5rem;
     }
     h1 {
       font-size: 3rem;
       font-weight: 700;
       margin: 0;
     }
+    .download-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+    .download-btn:hover {
+      background-color: #1d4ed8;
+    }
   </style>
 </head>
 <body>
   <h1>Branch Demo</h1>
+  <!-- Replace app-release.apk with your actual APK filename -->
+  <a href="app-debug.apk" download class="download-btn">Download APK</a>
 </body>
 </html>
